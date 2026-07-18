@@ -16,7 +16,7 @@ whitenoise==6.7.0
 
 # Database drivers
 mysqlclient==2.2.4          # local dev (MySQL)
-psycopg2-binary==2.9.9      # production (PostgreSQL on Render)
+psycopg[binary]==3.2.3      # production (PostgreSQL on Render) — psycopg3, broad wheel support 3.12–3.14
 dj-database-url==2.2.0      # parse Render's DATABASE_URL
 
 # WSGI server (production)

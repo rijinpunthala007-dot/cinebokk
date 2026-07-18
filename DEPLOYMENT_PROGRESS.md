@@ -60,8 +60,21 @@ Resume point for an interrupted session. Each task lists status, what changed, a
 
 ---
 
+## ✅ Task 9 — psycopg3 driver + Python version pin (post-deploy fix)
+- **Symptom:** first Render deploy failed with `ImproperlyConfigured: Error loading psycopg2 or psycopg module`. Root cause: Render built on Python 3.14, which has no compatible prebuilt `psycopg2-binary==2.9.9` wheel (falls back to a source build that fails).
+- **Fix (belt-and-suspenders):**
+  1. Created `runtime.txt` = `python-3.12.7` to pin the build interpreter to a version with stable wheels.
+  2. Swapped `psycopg2-binary==2.9.9` → `psycopg[binary]==3.2.3` (psycopg3) — broad prebuilt wheel coverage across Python 3.12–3.14, Django's recommended adapter going forward.
+- **No settings change needed:** `ENGINE` stays `django.db.backends.postgresql` for all Postgres branches. Django 4.2+ auto-selects psycopg3 when installed, psycopg2 otherwise — same ENGINE string. `sslmode` in `OPTIONS` is a libpq keyword both drivers accept.
+- Verified `dj-database-url` produces `django.db.backends.postgresql` for `postgres://` and `postgresql://` URLs (the branch Render uses).
+- **Not smoke-tested locally** (Windows dev box uses SQLite; psycopg3 not installed there) — real validation is the next Render deploy.
+- **Fallback if `runtime.txt` is ignored:** Render also reads a `PYTHON_VERSION` env var — set `PYTHON_VERSION=3.12.7` in the dashboard if needed.
+- Files: `runtime.txt` (new), `requirements.txt`.
+
+---
+
 ## Summary flags
 - **Total static asset size: 9.0 MB** — well under the 100MB concern. Safe to commit to git for Render deploy.
 - **MySQL-specific SQL:** none needing manual attention (only `charset`/`sql_mode` OPTIONS, already gated in the MySQL branch).
-- **Local psycopg2 note:** `DATABASE_URL` parsing confirmed (correct `postgresql` ENGINE). A local connection load errors with `No module named 'psycopg2'` — expected, since `psycopg2-binary` is installed on Render (in requirements.txt) not on the Windows dev box. Not a defect.
-- **Repo is not yet a git repository** — `git init` + commit required before connecting to Render.
+- **Postgres driver:** psycopg3 (`psycopg[binary]==3.2.3`), Python pinned to 3.12.7 via `runtime.txt`. `DATABASE_URL` parsing confirmed → correct `postgresql` ENGINE. Local connection not testable on the Windows/SQLite dev box — validated on Render deploy.
+- **Repo is now a git repository** — `.gitignore` in place; `.env`, `db.sqlite3`, `.claude/`, `staticfiles/`, local `backdrops/`+`posters/` source art all excluded. Ready for `git add .` + commit.
