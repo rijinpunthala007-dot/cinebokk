@@ -30,8 +30,14 @@ staticfiles/
 # The sanitized copies under static/img/ are what ship + get served.
 # `backdrops/` is the input `sync_backdrops.py` reads from; `posters/`
 # is orphaned master art. Kept locally, not committed.
-backdrops/
-posters/
+#
+# IMPORTANT: these patterns are ANCHORED with a leading slash so they match
+# ONLY the top-level source folders, NOT the shipped copies under
+# static/img/posters/ and static/img/backdrops/. Without the anchor, an
+# unanchored `posters/` also matched static/img/posters/, so the deployed
+# posters were never committed and 404'd on Render (monogram fallback).
+/backdrops/
+/posters/
 
 # media/ is intentionally NOT ignored: it is empty/unused after the
 # static-file migration. If runtime uploads are reintroduced later,

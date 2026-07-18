@@ -103,6 +103,20 @@ Resume point for an interrupted session. Each task lists status, what changed, a
 
 ---
 
+## ✅ Task 12 — Posters 404 on live: unanchored .gitignore excluded them (root cause)
+- **Symptom:** after Task 11 deploy, trailers + cast photos display correctly, but every poster shows the monogram placeholder.
+- **False lead (ruled out):** suspected `poster_url` pointed at the wrong folder (`/static/posters/` vs `/static/img/posters/`). Checked — the baked paths in `MEDIA_AND_CAST` (`/static/img/posters/...`) exactly match the on-disk folder, and `collectstatic` picks them up locally. Path was never the bug.
+- **Actual root cause — `.gitignore`:** line 34 was `posters/` (unanchored). A gitignore pattern with no leading slash matches a directory of that name **at any depth**, so it caught BOTH the intended top-level master-art folder `posters/` AND the shipped `static/img/posters/`. `git ls-files static/img/posters/` returned **0** — the poster files were never committed, so Render's build had no poster images. Every poster URL 404'd and the frontend's `onerror` handler (`home.js:218`, `movie_detail.js:120`) silently swapped in the monogram.
+- **Why cast/trailers worked but posters didn't:** `static/img/cast/` is not ignored (47 files tracked → shipped). Trailers are YouTube URLs (no file). Backdrops are regenerated at deploy by `sync_backdrops` (and several are remote Unsplash URLs), so they don't depend on being committed. Posters have **no** regeneration command — committing them is the only delivery path.
+- **Fix (fewest things touched — 1 file):** anchored the ignore patterns to the repo root: `backdrops/` → `/backdrops/`, `posters/` → `/posters/`. Now they match only the top-level source folders, not the `static/img/` copies. Consistent with how `static/img/cast/` already ships. No file moves, no path edits to `seed_movies.py` needed.
+- **Verified:**
+  - `git check-ignore` — `static/img/posters/*` and `static/img/backdrops/*` no longer ignored; top-level `posters/` + `backdrops/` still ignored (master art stays local).
+  - `git add static/img/posters/` → **20 poster files staged** (was 0); 7 backdrops staged too.
+  - Exact-match re-check (baked `poster_url` vs `git ls-files`, case-sensitive): **20/20 SHIP, 0 missing** — including the irregular names (`Super_girl.jpg`, `The_odysseys.jpg`, `lokha.jpg`, `Dhurandar.jpg`, `cock_tail_2.jpg`).
+- Files: `.gitignore` (+ 20 posters, 7 backdrops now tracked).
+
+---
+
 ## Summary flags
 - **Total static asset size: 9.0 MB** — well under the 100MB concern. Safe to commit to git for Render deploy.
 - **MySQL-specific SQL:** none needing manual attention (only `charset`/`sql_mode` OPTIONS, already gated in the MySQL branch).
