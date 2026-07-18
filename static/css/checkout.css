@@ -1,0 +1,145 @@
+/*
+ * CineBook — checkout.css
+ * ========================
+ * Checkout (payment form + summary) and Confirmation (ticket-style card).
+ */
+
+/* ============ CHECKOUT LAYOUT ============ */
+.checkout-title { font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.02em; margin-bottom: var(--sp-8); }
+.checkout-grid { display: grid; grid-template-columns: 1fr 360px; gap: var(--sp-8); align-items: start; }
+
+/* Lock hold banner */
+.lock-banner {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--warning-soft);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--sp-6);
+  font-size: var(--text-sm); font-weight: 500;
+  color: var(--warning);
+}
+.lock-banner__timer { font-weight: 800; font-family: var(--font-display); margin-left: auto; font-size: var(--text-md); }
+.lock-banner--urgent { animation: pulse-opacity 1s ease infinite; }
+@keyframes pulse-opacity { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+/* Payment card */
+.payment-card { padding: var(--sp-8); }
+.payment-card h2 { font-size: var(--text-xl); font-weight: 800; margin-bottom: var(--sp-1); }
+.payment-card__sub { color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--sp-6); }
+.test-note {
+  background: var(--blue-soft);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-6);
+  font-size: var(--text-xs); color: var(--blue-select-deep);
+}
+.test-note strong { font-weight: 700; }
+
+/* Summary card (sticky) */
+.summary-card {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  position: sticky; top: calc(var(--nav-height) + var(--sp-6));
+}
+.summary-card__header {
+  padding: var(--sp-4) var(--sp-6);
+  font-family: var(--font-display); font-weight: 800; font-size: var(--text-md);
+  background: var(--surface-sunken);
+}
+.summary-card__body { padding: var(--sp-5) var(--sp-6) var(--sp-6); }
+.summary-movie { font-family: var(--font-display); font-weight: 700; font-size: var(--text-md); margin-bottom: 2px; }
+.summary-sub { font-size: var(--text-sm); color: var(--text-secondary); }
+.summary-divider { height: 1px; background: var(--surface-sunken-2); margin: var(--sp-4) 0; }
+.summary-label {
+  font-size: var(--text-2xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-tertiary); margin-bottom: var(--sp-3);
+}
+.summary-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-2) 0; font-size: var(--text-sm); }
+.summary-row__label { color: var(--text-secondary); }
+.summary-row__value { font-weight: 600; }
+.summary-row--total { padding-top: var(--sp-4); margin-top: var(--sp-2); border-top: 1px solid var(--surface-sunken-2); }
+.summary-row--total .summary-row__label { font-weight: 700; color: var(--text-primary); font-size: var(--text-md); }
+.summary-row--total .summary-row__value { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800; }
+
+/* ============ CONFIRMATION TICKET ============ */
+/* A ticket you'd tear at the perforation: rounded card, dashed divider
+   with punched notches, monospace-feel booking code */
+.ticket { max-width: 480px; margin: 0 auto; }
+.ticket__card {
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+}
+.ticket__header { padding: var(--sp-8) var(--sp-6) var(--sp-6); text-align: center; }
+.ticket__check {
+  width: 62px; height: 62px; border-radius: 50%;
+  background: var(--success-soft);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto var(--sp-4);
+  animation: pop-in 0.4s var(--ease-spring);
+}
+@keyframes pop-in { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.ticket__movie { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.02em; }
+.ticket__sub { color: var(--text-secondary); font-size: var(--text-sm); margin-top: var(--sp-1); }
+
+/* Perforation: dashed line + punched semicircle notches (canvas shows through) */
+.ticket__tear { position: relative; height: 0; border-top: 2px dashed var(--surface-sunken-2); margin: 0 var(--sp-5); }
+.ticket__tear::before, .ticket__tear::after {
+  content: ''; position: absolute; top: -12px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--bg-canvas);
+  box-shadow: inset 0 2px 4px rgba(30, 40, 60, 0.06);
+}
+.ticket__tear::before { left: -32px; }
+.ticket__tear::after  { right: -32px; }
+
+.ticket__body { padding: var(--sp-6); }
+.ticket-row { display: flex; justify-content: space-between; align-items: baseline; padding: var(--sp-3) 0; }
+.ticket-row + .ticket-row { border-top: 1px solid var(--surface-sunken); }
+.ticket-row__label {
+  font-size: var(--text-2xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+.ticket-row__value { font-weight: 600; font-size: var(--text-sm); text-align: right; }
+.ticket-row__value--total { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800; }
+
+.ticket__ref {
+  text-align: center;
+  padding: var(--sp-5) var(--sp-6);
+  background: var(--surface-sunken);
+}
+.ticket__ref-label {
+  font-size: var(--text-2xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-tertiary); margin-bottom: var(--sp-1);
+}
+.ticket__ref-code {
+  font-family: var(--font-display);
+  font-size: var(--text-lg); font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--text-primary);
+}
+
+.ticket__actions { display: flex; gap: var(--sp-3); justify-content: center; flex-wrap: wrap; margin-top: var(--sp-8); }
+
+/* Status banner for non-confirmed bookings viewed via this page */
+.ticket__status-cancelled .ticket__check { background: var(--error-soft); }
+
+/* ============ PRINT — the ticket IS the printable artifact ============ */
+@media print {
+  .navbar, .footer, .ticket__actions, .toast-container, .skip-link { display: none !important; }
+  .page-content { padding: 0; min-height: 0; }
+  body { background: #fff; }
+  .ticket__card { box-shadow: none; border: 1px solid #ccc; }
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 900px) {
+  .checkout-grid { grid-template-columns: 1fr; }
+  .summary-card { position: static; order: -1; }
+}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile — CineBook{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container" style="max-width:560px;">
+    <h1 class="bookings-title mb-8">Your Profile</h1>
+
+    <div class="card card--pad" id="profileCard" aria-live="polite">
+      <div class="skeleton skeleton--line" aria-hidden="true"></div>
+      <div class="skeleton skeleton--line" style="width:70%;" aria-hidden="true"></div>
+      <div class="skeleton skeleton--line-sm" aria-hidden="true"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  'use strict';
+
+  if (!isAuthenticated()) {
+    window.location.href = '/accounts/login/?next=/accounts/profile/';
+    return;
+  }
+
+  const card = document.getElementById('profileCard');
+
+  async function loadProfile() {
+    let resp;
+    try {
+      resp = await api.get('/auth/profile/');
+    } catch {
+      resp = { ok: false, data: null };
+    }
+
+    if (!resp.ok || !resp.data) {
+      card.innerHTML = `
+        <p class="text-secondary text-center" style="padding:12px 0;">We couldn't load your profile. Try refreshing.</p>`;
+      return;
+    }
+
+    const u = resp.data;
+    const joined = u.date_joined
+      ? new Date(u.date_joined).toLocaleDateString('en-IN', { year: 'numeric', month: 'long' })
+      : '';
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+        <div class="navbar__avatar" style="width:56px;height:56px;font-size:1.3rem;" id="pInitial" aria-hidden="true"></div>
+        <div>
+          <div style="font-family:var(--font-display);font-weight:800;font-size:var(--text-lg);" id="pName"></div>
+          <div class="text-secondary text-sm" id="pUsername"></div>
+        </div>
+      </div>
+      <div id="pRows"></div>
+      <a href="/bookings/my-bookings/" class="btn btn--dark mt-6">My Bookings</a>
+    `;
+    // textContent for user-controlled values
+    document.getElementById('pInitial').textContent = (u.first_name || u.username)[0].toUpperCase();
+    document.getElementById('pName').textContent = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username;
+    document.getElementById('pUsername').textContent = '@' + u.username;
+
+    const rows = [
+      ['Email', u.email],
+      ['Phone', u.profile?.phone],
+      ['City', u.profile?.city],
+      ['Member since', joined],
+    ];
+    const rowsEl = document.getElementById('pRows');
+    rows.forEach(([label, value]) => {
+      if (!value) return;
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--surface-sunken);';
+      const l = document.createElement('span');
+      l.style.cssText = 'font-size:var(--text-2xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);';
+      l.textContent = label;
+      const v = document.createElement('span');
+      v.style.cssText = 'font-weight:600;font-size:var(--text-sm);';
+      v.textContent = value;
+      div.append(l, v);
+      rowsEl.appendChild(div);
+    });
+  }
+
+  loadProfile();
+})();
+</script>
+{% endblock %}

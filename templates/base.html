@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{% block meta_description %}CineBook — Book movie tickets online. Browse movies, choose your seats, and enjoy the show.{% endblock %}">
+  <title>{% block title %}CineBook — Book Movie Tickets Online{% endblock %}</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans (display/headings) + Inter (body/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Design tokens FIRST, then shared base, then page CSS via extra_css -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+  <!-- Favicon: coral ticket stub -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='7' width='26' height='18' rx='5' fill='%23FF3B5C'/><circle cx='3' cy='16' r='3.5' fill='%23F4F6FA'/><circle cx='29' cy='16' r='3.5' fill='%23F4F6FA'/><line x1='16' y1='9' x2='16' y2='23' stroke='%23F4F6FA' stroke-width='1.6' stroke-dasharray='2.5 2.5'/></svg>">
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Toast Container (toasts carry their own role=status/alert) -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Navigation -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container navbar__inner">
+
+    <!-- Logo: coral ticket-stub mark + wordmark -->
+    <a href="/" class="navbar__logo" aria-label="CineBook Home">
+      <div class="navbar__logo-icon" aria-hidden="true"></div>
+      <span class="navbar__logo-text"><em>Cine</em>Book</span>
+    </a>
+
+    <!-- City Selector -->
+    <button class="navbar__city" id="navCityBtn" aria-label="Select your city">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      <span id="navCityLabel">Mumbai</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+
+    <!-- Search -->
+    <div class="navbar__search" role="search">
+      <svg class="navbar__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="search"
+        id="navSearch"
+        placeholder="Search movies..."
+        aria-label="Search movies"
+        autocomplete="off"
+      >
+    </div>
+
+    <!-- Actions -->
+    <div class="navbar__actions">
+      <div id="navAuthSection">
+        <!-- Populated by JS based on auth state -->
+        <a href="/accounts/login/" class="navbar__btn navbar__btn--ghost">Login</a>
+        <a href="/accounts/register/" class="navbar__btn navbar__btn--dark">Sign Up</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main id="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__brand-name"><em>Cine</em>Book</div>
+        <p>Book tickets for the best movies in your city — pick your seats, pay securely, and you're set.</p>
+      </div>
+      <div>
+        <h3 class="footer__title">Movies</h3>
+        <div class="footer__links">
+          <a href="/" class="footer__link">Now Showing</a>
+          <a href="/?language=Hindi" class="footer__link">Hindi</a>
+          <a href="/?language=English" class="footer__link">English</a>
+          <a href="/?language=Tamil" class="footer__link">Tamil</a>
+        </div>
+      </div>
+      <div>
+        <h3 class="footer__title">Help</h3>
+        <div class="footer__links">
+          <a href="/bookings/my-bookings/" class="footer__link">My Bookings</a>
+          <a href="#" class="footer__link">Customer Support</a>
+          <a href="#" class="footer__link">Cancellation Policy</a>
+          <a href="#" class="footer__link">FAQs</a>
+        </div>
+      </div>
+      <div>
+        <h3 class="footer__title">Connect</h3>
+        <div class="footer__links">
+          <a href="#" class="footer__link">Twitter</a>
+          <a href="#" class="footer__link">Instagram</a>
+          <a href="#" class="footer__link">Facebook</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2026 CineBook. All rights reserved.</span>
+      <span>Made for movie lovers.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Core JS -->
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/auth.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

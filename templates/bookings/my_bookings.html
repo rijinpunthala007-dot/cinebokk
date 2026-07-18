@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Bookings — CineBook{% endblock %}
+{% block meta_description %}View and manage your cinema ticket bookings on CineBook.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container">
+
+    <div class="flex-between mb-8">
+      <h1 class="bookings-title">My Bookings</h1>
+      <a href="/" class="btn btn--dark">Book More</a>
+    </div>
+
+    <!-- Status filter -->
+    <div class="filter-bar" id="statusFilter" role="group" aria-label="Filter by status">
+      <button class="chip active" data-status="" aria-pressed="true">All</button>
+      <button class="chip" data-status="CONFIRMED" aria-pressed="false">Confirmed</button>
+      <button class="chip" data-status="CANCELLED" aria-pressed="false">Cancelled</button>
+    </div>
+
+    <!-- Bookings list -->
+    <div id="bookingsList" aria-live="polite">
+      <div class="skeleton skeleton--block" aria-hidden="true"></div>
+      <div class="skeleton skeleton--block" aria-hidden="true"></div>
+      <div class="skeleton skeleton--block" aria-hidden="true"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyBookings" class="empty-state hidden">
+      <svg width="56" height="56" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect x="6" y="14" width="36" height="22" rx="6" stroke="currentColor" stroke-width="2"/>
+        <path d="M6 25h4M38 25h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M24 18v14" stroke="currentColor" stroke-width="2" stroke-dasharray="3 4" stroke-linecap="round"/>
+      </svg>
+      <h3 id="emptyBookingsTitle">No bookings yet</h3>
+      <p id="emptyBookingsDesc">Your tickets will live here once you book your first show.</p>
+      <a href="/" class="btn btn--dark btn--lg">Browse Movies</a>
+    </div>
+
+    <!-- Error state -->
+    <div id="errorBookings" class="empty-state hidden">
+      <svg width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+        <path d="M24 16v10M24 32v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h3>We couldn't load your bookings</h3>
+      <p>Something went wrong on our end. Give it another try.</p>
+      <button class="btn btn--soft" id="retryBookingsBtn">Try Again</button>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="pagination hidden"></div>
+
+  </div>
+</div>
+
+<!-- Cancel confirmation modal -->
+<div id="cancelModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="cancelModalTitle">
+  <div class="modal">
+    <h2 id="cancelModalTitle">Cancel this booking?</h2>
+    <p class="modal__desc">Your seats go back on sale and this can't be undone.</p>
+    <div class="form-group">
+      <label class="form-label" for="cancelReason">Reason (optional)</label>
+      <input type="text" id="cancelReason" class="form-input" placeholder="Changed plans, booked twice…" maxlength="500">
+    </div>
+    <div class="modal__actions">
+      <button class="btn btn--ghost btn--full" id="cancelModalClose">Keep Booking</button>
+      <button class="btn btn--danger btn--full" id="cancelModalConfirm">Yes, Cancel It</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/my_bookings.js' %}"></script>
+{% endblock %}

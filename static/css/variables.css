@@ -1,0 +1,139 @@
+/*
+ * CineBook Design Tokens — variables.css
+ * =======================================
+ * Source of truth for the "Soft Daylight Lobby" design system.
+ * Locked 2026-07-16 (light soft-UI direction).
+ *
+ * The signature technique is SHADOW, not color: cards float on the
+ * off-white canvas via soft ambient shadows instead of borders or
+ * dark surfaces. One coral gradient per screen, on the primary CTA only.
+ *
+ * Palette rationale (every choice traces to the cinema/ticket world):
+ *   --grad-cta   : coral-to-red — the red velvet curtain / ticket stub red,
+ *                  reserved exclusively for "buy the ticket" moments
+ *   --blue-select: soft daylight blue — selected showtime chip / active date,
+ *                  cool so it never competes with the coral CTA
+ *   --seat-selected: warm amber — the single warm glow of "your seat" in an
+ *                  otherwise calm, muted auditorium grid
+ */
+
+:root {
+
+  /* ---- CANVAS & SURFACES ---- */
+  --bg-canvas:        #F4F6FA;   /* soft off-white, gives shadows room to read */
+  --surface-card:     #FFFFFF;   /* cards elevate via shadow, never border */
+  --surface-sunken:   #EBEEF4;   /* inset wells: search fields, tab tracks */
+  --surface-sunken-2: #E2E6EE;   /* deeper inset (pressed states) */
+
+  /* ---- PRIMARY ACCENT — coral/crimson, CTA only ---- */
+  /* Stops deepened from FF3B5C/FF7A59 so white 16px-bold label text holds
+     4.5:1 across the whole gradient run */
+  --grad-cta:        linear-gradient(135deg, #E32350 0%, #D24418 100%);
+  --grad-cta-hover:  linear-gradient(135deg, #C71B39 0%, #BE3A18 100%);
+  --coral:           #FF3B5C;    /* solid fallback / small NON-TEXT accents */
+  --coral-deep:      #D01F41;    /* text usage of the accent: 5.3:1 on white,
+                                    4.7:1 on --coral-soft (hero eyebrow) */
+  --coral-soft:      rgba(255, 59, 92, 0.09);
+  --coral-ring:      rgba(255, 59, 92, 0.22);
+  --shadow-cta:      0 8px 20px rgba(255, 59, 92, 0.32);
+
+  /* ---- SELECTED / ACTIVE — soft blue (chips, dates) ---- */
+  --blue-select:      #4A9EFF;   /* rings/tints only — too light under white text */
+  --blue-select-deep: #1668C7;   /* AA text on white (5.5:1) and on --blue-soft (4.8:1);
+                                    also the fill behind white text (active date tab) */
+  --blue-soft:        rgba(74, 158, 255, 0.12);
+  --blue-ring:        rgba(74, 158, 255, 0.30);
+
+  /* ---- TEXT — charcoal navy hierarchy (all steps AA on white) ---- */
+  --text-primary:    #1A1D29;
+  --text-secondary:  #596274;    /* 6.1:1 — also clears AA on sunken surfaces */
+  --text-tertiary:   #667085;    /* 5.0:1 on white, 4.6:1 on canvas — smallest labels hold AA */
+  --text-disabled:   #C3C9D6;
+  --text-on-accent:  #FFFFFF;
+
+  /* ---- SEAT MAP ---- */
+  --seat-available:     #E4E7EE; /* muted gray-lavender */
+  --seat-available-ink: #575F73; /* seat number ink on available */
+  --seat-selected:      #F5A623; /* warm amber — YOUR seat, sparingly */
+  --seat-selected-ink:  #3A2800;
+  --seat-booked:        #F0F1F5; /* near-canvas: reads as "gone", plus strike */
+  --seat-booked-ink:    #7E88A0; /* strike + ring hold 3:1 (non-text state cue) */
+  /* Category tints — subtle; labels + shape carry the real distinction */
+  --seat-classic-tint:  #E4E7EE;
+  --seat-premium-tint:  #DFE5F3; /* faint blue-lavender */
+  --seat-recliner-tint: #EFE6DC; /* faint warm sand */
+
+  /* ---- STATUS (each ≥4.5:1 on white AND on its own soft tint) ---- */
+  --success:       #147A43;
+  --success-soft:  rgba(20, 122, 67, 0.10);
+  --warning:       #935800;
+  --warning-soft:  rgba(147, 88, 0, 0.10);
+  --error:         #CE2F3F;
+  --error-soft:    rgba(206, 47, 63, 0.09);
+
+  /* ---- TYPOGRAPHY ---- */
+  --font-display: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; /* headings, prices */
+  --font-body:    'Inter', -apple-system, 'Segoe UI', sans-serif;
+
+  --text-2xs: 0.6875rem;
+  --text-xs:  0.75rem;
+  --text-sm:  0.875rem;
+  --text-md:  1rem;
+  --text-lg:  1.125rem;
+  --text-xl:  1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+
+  /* ---- SPACING (varied rhythm, not uniform p-4) ---- */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-14: 56px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+
+  /* ---- RADII — generous, soft-UI ---- */
+  --radius-sm:   10px;
+  --radius-md:   16px;
+  --radius-lg:   20px;
+  --radius-xl:   24px;
+  --radius-pill: 9999px;
+
+  /* ---- SHADOWS — these do the work borders would ---- */
+  --shadow-xs:   0 1px 3px rgba(30, 40, 60, 0.06);
+  --shadow-sm:   0 2px 10px rgba(30, 40, 60, 0.07);
+  --shadow-card: 0 8px 24px rgba(30, 40, 60, 0.08);
+  --shadow-lift: 0 14px 36px rgba(30, 40, 60, 0.13);
+  --shadow-modal:0 24px 64px rgba(30, 40, 60, 0.22);
+  /* Inset well for sunken controls */
+  --shadow-inset: inset 0 1px 3px rgba(30, 40, 60, 0.08);
+
+  /* ---- MOTION ---- */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --t-fast:   130ms cubic-bezier(0.16, 1, 0.3, 1);
+  --t-base:   220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --t-slow:   380ms cubic-bezier(0.16, 1, 0.3, 1);
+  --t-spring: 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- LAYOUT ---- */
+  --container-max: 1240px;
+  --nav-height:    68px;
+}
+
+/* Reduced motion: kill animation/transition durations globally */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

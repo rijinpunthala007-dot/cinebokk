@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout — CineBook{% endblock %}
+{% block meta_description %}Complete your booking and pay for your cinema tickets.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container">
+    <h1 class="checkout-title">Complete Your Booking</h1>
+
+    <div class="checkout-grid">
+
+      <!-- Payment column -->
+      <div>
+        <!-- Lock hold banner with live countdown (no aria-live: a per-second
+             tick would flood screen readers; expiry is announced via toast) -->
+        <div id="lockBanner" class="lock-banner" role="timer" aria-label="Seat hold time remaining">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>
+          </svg>
+          <span>Your seats are held</span>
+          <span class="lock-banner__timer" id="lockTimerText">5:00</span>
+        </div>
+
+        <div class="card payment-card">
+          <h2>Payment Details</h2>
+          <p class="payment-card__sub">Simulated payment — no real card is charged.</p>
+
+          <div class="test-note">
+            <strong>Test mode:</strong> any 16-digit number, any future expiry, any 3-digit CVV.
+          </div>
+
+          <form id="paymentForm" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="cardNumber">Card Number</label>
+              <input type="text" id="cardNumber" aria-describedby="cardNumberError" class="form-input"
+                placeholder="4242 4242 4242 4242" maxlength="19"
+                autocomplete="cc-number" inputmode="numeric" required>
+              <div class="form-error hidden" id="cardNumberError" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="nameOnCard">Name on Card</label>
+              <input type="text" id="nameOnCard" aria-describedby="nameOnCardError" class="form-input"
+                placeholder="Full name" autocomplete="cc-name" required>
+              <div class="form-error hidden" id="nameOnCardError" aria-live="polite"></div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="expiry">Expiry Date</label>
+                <input type="text" id="expiry" aria-describedby="expiryError" class="form-input"
+                  placeholder="MM/YY" maxlength="5" autocomplete="cc-exp"
+                  inputmode="numeric" required>
+                <div class="form-error hidden" id="expiryError" aria-live="polite"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="cvv">CVV</label>
+                <input type="password" id="cvv" aria-describedby="cvvError" class="form-input"
+                  placeholder="•••" maxlength="4" autocomplete="cc-csc"
+                  inputmode="numeric" required>
+                <div class="form-error hidden" id="cvvError" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- The one gradient element on this screen -->
+            <button type="submit" class="btn btn--cta btn--full btn--lg" id="payBtn">
+              Pay &amp; Confirm Booking
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Summary column -->
+      <div class="summary-card">
+        <div class="summary-card__header">Booking Summary</div>
+        <div class="summary-card__body" id="summaryContent">
+          <div class="skeleton skeleton--line" aria-hidden="true"></div>
+          <div class="skeleton skeleton--line" style="width:80%;" aria-hidden="true"></div>
+          <div class="skeleton skeleton--line-sm" aria-hidden="true"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/checkout.js' %}"></script>
+{% endblock %}

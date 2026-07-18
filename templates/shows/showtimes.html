@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Theater & Showtimes — CineBook{% endblock %}
+{% block meta_description %}Compare theaters and pick your showtime for your chosen movie. Multiple formats, amenity choices, and instant seat maps.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/shows.css' %}">
+<link rel="stylesheet" href="{% static 'css/theaters.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container">
+
+    <h1 class="sr-only">Select Theater & Showtimes</h1>
+
+    <!-- Movie summary bar -->
+    <div id="movieBar" class="movie-bar">
+      <div class="movie-bar__poster skeleton" aria-hidden="true"></div>
+      <div style="flex:1;">
+        <div class="skeleton skeleton--line" style="width:260px;height:20px;" aria-hidden="true"></div>
+        <div class="skeleton skeleton--line-sm" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- 7-day date strip -->
+    <div class="date-tabs" id="dateTabs" role="group" aria-label="Show dates"></div>
+
+    <!-- Language filter (built dynamically from results) -->
+    <div class="filter-bar" id="langFilter" role="group" aria-label="Language filters">
+      <button class="chip active" data-lang="" aria-pressed="true">All Languages</button>
+    </div>
+
+    <!-- Theater cards list -->
+    <div id="showsList" aria-live="polite">
+      <div class="skeleton skeleton--block" aria-hidden="true"></div>
+      <div class="skeleton skeleton--block" aria-hidden="true"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyShows" class="empty-state hidden">
+      <svg width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+        <path d="M24 14v12l7 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h3>No shows in this city on this date</h3>
+      <p>Try selecting another date, or change your city from the top bar.</p>
+    </div>
+
+    <!-- Error state -->
+    <div id="errorShows" class="empty-state hidden">
+      <svg width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+        <path d="M24 16v10M24 32v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h3>We couldn't load the theaters and showtimes</h3>
+      <p>Something went wrong on our end. Give it another try.</p>
+      <button class="btn btn--soft" id="retryShowsBtn">Try Again</button>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/theaters.js' %}"></script>
+{% endblock %}

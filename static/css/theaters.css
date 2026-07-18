@@ -1,0 +1,246 @@
+/*
+ * CineBook — theaters.css
+ * =======================
+ * Theater Selection Screen (BookMyShow pattern):
+ * Movie bar, 7-day date strip, theater cards with info popover, favorite heart,
+ * amenity pills, showtime chips (available, almost-full, selected, sold-out),
+ * and cancellation status text.
+ */
+
+/* ============ THEATER CARD ============ */
+.theater-card {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--sp-5);
+  padding: var(--sp-6);
+  transition: var(--t-fast);
+}
+.theater-card:hover {
+  box-shadow: var(--shadow-lift);
+}
+
+.theater-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--surface-sunken-2);
+}
+
+.theater-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.theater-card__name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Info Icon & Tooltip */
+.theater-info-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.theater-info-btn {
+  color: var(--text-tertiary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  transition: var(--t-fast);
+}
+.theater-info-btn:hover {
+  color: var(--blue-select-deep);
+  background: var(--blue-soft);
+}
+.theater-info-tooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 240px;
+  max-width: 320px;
+  background: var(--text-primary);
+  color: #fff;
+  font-size: var(--text-xs);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal);
+  z-index: 100;
+  display: none;
+  line-height: 1.4;
+}
+.theater-info-wrap:hover .theater-info-tooltip,
+.theater-info-wrap:focus-within .theater-info-tooltip {
+  display: block;
+}
+
+/* Favorite Heart Icon */
+.theater-fav-btn {
+  color: var(--text-disabled);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  transition: var(--t-fast);
+}
+.theater-fav-btn:hover {
+  color: var(--coral-deep);
+  background: var(--coral-soft);
+}
+.theater-fav-btn.active {
+  color: var(--coral-deep);
+}
+.theater-fav-btn.active svg {
+  fill: var(--coral-deep);
+}
+
+/* Amenity Badges / Format Pills */
+.theater-amenities {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  margin-top: var(--sp-2);
+}
+.amenity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ============ SHOWTIME CHIPS ============ */
+.theater-card__shows-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.showtime-chips-grid {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.show-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--surface-sunken-2);
+  background: var(--surface-card);
+  min-width: 96px;
+  text-align: center;
+  transition: var(--t-fast);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.show-chip:hover {
+  border-color: var(--blue-select-deep);
+  background: var(--blue-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.show-chip__time {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.show-chip__fmt {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* Almost full state (subtle warning tint) */
+.show-chip--almost-full {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+.show-chip--almost-full .show-chip__time {
+  color: var(--warning);
+}
+
+/* Selected state (amber accent matching seat map selection token) */
+.show-chip.selected {
+  border-color: var(--seat-selected);
+  background: var(--seat-selected);
+  box-shadow: 0 4px 14px rgba(245, 166, 35, 0.4);
+}
+.show-chip.selected .show-chip__time,
+.show-chip.selected .show-chip__fmt {
+  color: var(--seat-selected-ink);
+}
+
+/* Sold out state */
+.show-chip--soldout {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--surface-sunken);
+  border-color: transparent;
+}
+.show-chip--soldout:hover {
+  transform: none;
+  box-shadow: none;
+  background: var(--surface-sunken);
+}
+.show-chip--soldout .show-chip__time {
+  text-decoration: line-through;
+  color: var(--text-disabled);
+}
+
+/* Status Line below chips */
+.theater-card__status-line {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin-top: var(--sp-2);
+}
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.status-indicator--cancellable {
+  color: var(--success);
+}
+.status-indicator--non-cancellable {
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 640px) {
+  .theater-card { padding: var(--sp-4); }
+  .theater-card__header { flex-direction: column; gap: var(--sp-2); }
+  .show-chip { min-width: 84px; padding: var(--sp-2) var(--sp-3); }
+}

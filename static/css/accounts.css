@@ -1,0 +1,122 @@
+/*
+ * CineBook — accounts.css
+ * ========================
+ * Login / Register pages + My Bookings list.
+ */
+
+/* ============ AUTH ============ */
+.auth-page {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(var(--nav-height) + var(--sp-8)) var(--sp-4) var(--sp-8);
+}
+.auth-card {
+  width: 100%; max-width: 430px;
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lift);
+  padding: var(--sp-10);
+}
+.auth-logo { text-align: center; margin-bottom: var(--sp-8); }
+.auth-logo__wordmark { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.02em; }
+.auth-logo__wordmark em { font-style: normal; color: var(--coral-deep); }
+.auth-logo__tagline { font-size: var(--text-sm); color: var(--text-secondary); margin-top: 2px; }
+
+/* Tab switcher: sunken track, floating active pill */
+.auth-tabs {
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  margin-bottom: var(--sp-8);
+}
+.auth-tab {
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-pill);
+  text-align: center;
+  font-size: var(--text-sm); font-weight: 600;
+  color: var(--text-secondary);
+  transition: var(--t-fast);
+}
+.auth-tab.active {
+  background: var(--surface-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.auth-footer-link { font-size: var(--text-sm); color: var(--text-secondary); text-align: center; margin-top: var(--sp-6); }
+.auth-footer-link a { color: var(--coral-deep); font-weight: 600; }
+.auth-form-error { margin-bottom: var(--sp-4); }
+
+/* ============ MY BOOKINGS ============ */
+.bookings-title { font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.02em; }
+
+.booking-item {
+  display: grid; grid-template-columns: 64px 1fr auto;
+  gap: var(--sp-5);
+  padding: var(--sp-5);
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--sp-4);
+  align-items: center;
+  transition: transform var(--t-base), box-shadow var(--t-base);
+}
+.booking-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.booking-item--cancelled { opacity: 0.65; }
+.booking-item--cancelled:hover { transform: none; box-shadow: var(--shadow-card); }
+
+.booking-item__poster {
+  width: 64px; height: 90px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.booking-item__poster img { width: 100%; height: 100%; object-fit: cover; }
+.booking-item__monogram { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; color: hsl(var(--ph-hue, 220), 35%, 42%); }
+
+.booking-item__info { min-width: 0; }
+.booking-item__movie {
+  font-family: var(--font-display); font-weight: 700; font-size: var(--text-md);
+  margin-bottom: var(--sp-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.booking-item__meta { display: flex; flex-direction: column; gap: 3px; font-size: var(--text-xs); color: var(--text-secondary); }
+.booking-item__meta-row { display: flex; align-items: center; gap: 6px; }
+.booking-item__price { font-weight: 700; color: var(--text-primary); font-size: var(--text-sm); margin-top: 2px; }
+
+.booking-item__actions { display: flex; flex-direction: column; gap: var(--sp-2); align-items: flex-end; }
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  padding: 3px var(--sp-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-2xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.status-badge--confirmed { background: var(--success-soft); color: var(--success); }
+.status-badge--pending   { background: var(--warning-soft); color: var(--warning); }
+.status-badge--cancelled { background: var(--surface-sunken); color: var(--text-tertiary); }
+.status-badge--expired   { background: var(--surface-sunken); color: var(--text-tertiary); }
+
+/* Pagination */
+.pagination { display: flex; justify-content: center; gap: var(--sp-2); margin-top: var(--sp-8); }
+.pagination__btn {
+  min-width: 40px; height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+  font-weight: 600; font-size: var(--text-sm);
+  color: var(--text-secondary);
+  transition: var(--t-fast);
+}
+.pagination__btn:hover { box-shadow: var(--shadow-card); color: var(--text-primary); }
+.pagination__btn.active { background: var(--text-primary); color: #fff; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 640px) {
+  .auth-card { padding: var(--sp-6); }
+  .booking-item { grid-template-columns: 56px 1fr; }
+  .booking-item__actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; }
+}

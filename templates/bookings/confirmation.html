@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Confirmed — CineBook{% endblock %}
+{% block meta_description %}Your cinema booking is confirmed. Enjoy the show!{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container">
+    <div class="ticket" id="ticket">
+
+      <div class="ticket__card">
+        <div class="ticket__header">
+          <div class="ticket__check" id="ticketCheck" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12l5 5L19 7" stroke="#147A43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h1 class="ticket__movie" id="confirmMovieTitle">Booking Confirmed!</h1>
+          <p class="ticket__sub" id="confirmSub">Your seats are all set. Enjoy the show!</p>
+        </div>
+
+        <div class="ticket__tear" aria-hidden="true"></div>
+
+        <div class="ticket__body" id="ticketDetails">
+          <div class="skeleton skeleton--line" aria-hidden="true"></div>
+          <div class="skeleton skeleton--line" style="width:80%;" aria-hidden="true"></div>
+          <div class="skeleton skeleton--line-sm" aria-hidden="true"></div>
+        </div>
+
+        <div class="ticket__ref">
+          <div class="ticket__ref-label">Booking Reference</div>
+          <div class="ticket__ref-code" id="bookingRefCode">—</div>
+        </div>
+      </div>
+
+      <div class="ticket__actions">
+        <button class="btn btn--soft" id="printBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Print Ticket
+        </button>
+        <a href="/bookings/my-bookings/" class="btn btn--soft">My Bookings</a>
+        <a href="/" class="btn btn--dark">Book More Tickets</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/confirmation.js' %}"></script>
+{% endblock %}

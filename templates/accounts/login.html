@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login — CineBook{% endblock %}
+{% block meta_description %}Login to your CineBook account to manage bookings and book tickets.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <h1 class="auth-logo__wordmark"><em>Cine</em>Book</h1>
+      <div class="auth-logo__tagline">Your seat is waiting</div>
+    </div>
+
+    <div class="auth-tabs">
+      <span class="auth-tab active">Login</span>
+      <a href="/accounts/register/" class="auth-tab">Sign Up</a>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input type="text" id="username" aria-describedby="usernameError" name="username" class="form-input"
+          placeholder="your_username" autocomplete="username" required>
+        <div class="form-error hidden" id="usernameError" aria-live="polite"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" aria-describedby="passwordError" name="password" class="form-input"
+          placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password" required>
+        <div class="form-error hidden" id="passwordError" aria-live="polite"></div>
+      </div>
+
+      <div class="form-error hidden auth-form-error" id="loginError" aria-live="polite"></div>
+
+      <button type="submit" class="btn btn--dark btn--full btn--lg" id="loginBtn">Login</button>
+    </form>
+
+    <p class="auth-footer-link">
+      No account yet? <a href="/accounts/register/">Create one</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/login.js' %}"></script>
+{% endblock %}

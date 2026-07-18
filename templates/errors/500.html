@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Something Went Wrong — CineBook{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container">
+    <div class="empty-state">
+      <svg width="56" height="56" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+        <path d="M24 16v10M24 32v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h1>Something went wrong on our end</h1>
+      <p>The projector jammed. We're on it — try again in a moment.</p>
+      <a href="/" class="btn btn--dark btn--lg">Back to Movies</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,142 @@
+/*
+ * CineBook — shows.css
+ * =====================
+ * Showtimes page: movie summary bar, 7-day date strip, theater groups
+ * with scan-at-a-glance showtime chips (BookMyShow pattern).
+ */
+
+/* ============ MOVIE SUMMARY BAR ============ */
+.movie-bar {
+  display: flex; align-items: center; gap: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--sp-8);
+}
+.movie-bar__poster {
+  width: 56px; height: 78px;
+  border-radius: var(--radius-sm);
+  overflow: hidden; flex-shrink: 0;
+  background: var(--surface-sunken);
+  display: flex; align-items: center; justify-content: center;
+}
+.movie-bar__poster img { width: 100%; height: 100%; object-fit: cover; }
+.movie-bar__monogram {
+  font-family: var(--font-display); font-weight: 800; font-size: 1.6rem;
+  color: hsl(var(--ph-hue, 220), 35%, 42%);
+}
+.movie-bar__title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; }
+.movie-bar__title:hover { color: var(--coral-deep); }
+.movie-bar__meta { display: flex; gap: var(--sp-2); margin-top: 2px; font-size: var(--text-sm); color: var(--text-secondary); flex-wrap: wrap; }
+.movie-bar__city { margin-left: auto; font-size: var(--text-sm); color: var(--text-secondary); white-space: nowrap; }
+
+/* ============ DATE STRIP (7 days, scrollable) ============ */
+.date-tabs {
+  display: flex; gap: var(--sp-3);
+  overflow-x: auto;
+  padding: var(--sp-1) var(--sp-1) var(--sp-3);
+  scrollbar-width: none;
+  margin-bottom: var(--sp-6);
+}
+.date-tabs::-webkit-scrollbar { display: none; }
+.date-tab {
+  display: flex; flex-direction: column; align-items: center;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+  min-width: 68px; flex-shrink: 0;
+  transition: var(--t-fast);
+}
+.date-tab:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.date-tab.active {
+  background: var(--blue-select-deep); /* deep blue: white text holds 5.5:1 */
+  box-shadow: 0 6px 18px rgba(22, 104, 199, 0.35);
+}
+.date-tab__day {
+  font-size: var(--text-2xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+.date-tab__num {
+  font-family: var(--font-display);
+  font-size: 1.45rem; font-weight: 800; line-height: 1.2;
+  color: var(--text-primary);
+}
+.date-tab__month { font-size: var(--text-2xs); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+.date-tab.active .date-tab__day,
+.date-tab.active .date-tab__num,
+.date-tab.active .date-tab__month { color: #fff; }
+
+/* ============ THEATER GROUPS ============ */
+.theater-group {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--sp-5);
+  overflow: hidden;
+}
+.theater-group__header {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-6) var(--sp-3);
+}
+.theater-group__icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.theater-group__name { font-family: var(--font-display); font-weight: 700; font-size: var(--text-md); }
+.theater-group__sub { font-size: var(--text-xs); color: var(--text-tertiary); }
+
+/* Showtime chips: pill grid, whole theater scannable in one glance */
+.showtime-chips {
+  display: flex; gap: var(--sp-3); flex-wrap: wrap;
+  padding: var(--sp-2) var(--sp-6) var(--sp-6);
+}
+.showtime-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: var(--sp-2) var(--sp-5);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  min-width: 86px;
+  transition: var(--t-fast);
+}
+.showtime-chip:hover {
+  background: var(--blue-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+.showtime-chip__time {
+  font-family: var(--font-display);
+  font-weight: 700; font-size: var(--text-md);
+  color: var(--text-primary);
+}
+.showtime-chip:hover .showtime-chip__time { color: var(--blue-select-deep); }
+.showtime-chip__lang {
+  font-size: var(--text-2xs); font-weight: 600;
+  color: var(--text-secondary); /* tiny text on sunken bg — needs the darker step */
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+/* Seats-left hint: only surfaces when scarcity matters (<20%) */
+.showtime-chip__left { font-size: var(--text-2xs); font-weight: 600; color: var(--warning); }
+
+.showtime-chip--soldout {
+  opacity: 0.55; cursor: not-allowed;
+  background: var(--surface-sunken);
+}
+.showtime-chip--soldout:hover { transform: none; box-shadow: none; background: var(--surface-sunken); }
+.showtime-chip--soldout .showtime-chip__time { color: var(--text-disabled); text-decoration: line-through; }
+.showtime-chip--soldout .showtime-chip__left { color: var(--text-tertiary); }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 640px) {
+  .movie-bar { flex-wrap: wrap; }
+  .movie-bar__city { margin-left: 0; width: 100%; }
+  .showtime-chips { padding: var(--sp-2) var(--sp-4) var(--sp-5); }
+  .theater-group__header { padding: var(--sp-4) var(--sp-4) var(--sp-2); }
+  .showtime-chip { min-width: 78px; }
+}

@@ -1,0 +1,59 @@
+# ─── Django / Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*$py.class
+
+# Local database
+db.sqlite3
+db.sqlite3-journal
+
+# ─── Secrets / environment ──────────────────────────────────────────
+# Ignore all env files, but keep the committed template.
+.env
+.env.*
+!.env.example
+
+# ─── Virtual environments ───────────────────────────────────────────
+venv/
+env/
+.venv/
+ENV/
+
+# ─── Static / collected files ───────────────────────────────────────
+# collectstatic OUTPUT — regenerated on every deploy by build.sh.
+# NOTE: the source `static/` folder is intentionally NOT ignored — it
+# holds the pre-seeded posters, cast photos, and backdrops.
+staticfiles/
+
+# Local source artwork (master originals with human-readable names).
+# The sanitized copies under static/img/ are what ship + get served.
+# `backdrops/` is the input `sync_backdrops.py` reads from; `posters/`
+# is orphaned master art. Kept locally, not committed.
+backdrops/
+posters/
+
+# media/ is intentionally NOT ignored: it is empty/unused after the
+# static-file migration. If runtime uploads are reintroduced later,
+# add `media/` here.
+
+# ─── Logs ───────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── OS junk ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Editor / IDE ───────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ─── Frontend tooling ───────────────────────────────────────────────
+node_modules/
+
+# ─── Claude Code working directory ──────────────────────────────────
+.claude/
+
+# DEPLOYMENT_PROGRESS.md is deliberately tracked as project history —
+# do not add it here.

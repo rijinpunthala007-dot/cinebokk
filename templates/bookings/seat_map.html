@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Seats — CineBook{% endblock %}
+{% block meta_description %}Choose your seats for the show. Instant confirmation.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/seatmap.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content page-content--seatmap">
+  <div class="container">
+
+    <!-- Show info bar -->
+    <div id="showBar" class="show-bar">
+      <div class="skeleton" style="height:30px;width:300px;margin:0 auto 8px;" aria-hidden="true"></div>
+      <div class="skeleton" style="height:16px;width:210px;margin:0 auto;" aria-hidden="true"></div>
+    </div>
+
+    <!-- Screen indicator -->
+    <div class="screen-arc" aria-hidden="true">
+      <span class="screen-arc__curve"></span>
+      <span class="screen-arc__label">Screen this way</span>
+    </div>
+
+    <!-- Legend: state told by color + shape + words, never color alone -->
+    <div class="seat-legend" role="note" aria-label="Seat legend">
+      <div class="legend-item">
+        <span class="legend-swatch legend-swatch--available" aria-hidden="true"></span>
+        <span class="legend-item__text">
+          <span class="legend-item__name">Available</span>
+        </span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch legend-swatch--selected" aria-hidden="true"></span>
+        <span class="legend-item__text">
+          <span class="legend-item__name">Selected</span>
+          <span class="legend-item__sub">Your seats</span>
+        </span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch legend-swatch--booked" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 8.5l7-5" stroke="#7E88A0" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span class="legend-item__text">
+          <span class="legend-item__name">Booked</span>
+          <span class="legend-item__sub">Taken</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Seat grid (rows grouped under category section labels) -->
+    <div class="seat-area">
+      <div id="seatGridContainer" role="group" aria-label="Seat map">
+        <div class="skeleton" style="height:280px;max-width:560px;margin:0 auto;border-radius:20px;" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="seatError" class="empty-state hidden">
+      <svg width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+        <path d="M24 16v10M24 32v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h3 id="seatErrorTitle">We couldn't load the seat map</h3>
+      <p id="seatErrorDesc">Give it another try — the show hasn't gone anywhere.</p>
+      <button class="btn btn--soft" id="seatRetryBtn">Try Again</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Sticky booking footer: live seat tags, total, countdown, CTA -->
+<div class="booking-footer" id="bookingFooter" role="region" aria-label="Booking summary">
+  <div class="booking-footer__inner">
+    <div class="booking-footer__seats">
+      <div class="booking-footer__count" aria-live="polite">
+        <span id="selectedCount">0</span> seat(s) selected
+      </div>
+      <div class="booking-footer__seat-list" id="selectedSeatTags"></div>
+    </div>
+    <div class="booking-footer__right">
+      <div class="booking-footer__total">
+        <div class="booking-footer__price-label">Total</div>
+        <div class="booking-footer__price" id="totalPrice">₹0</div>
+        <div class="lock-timer hidden" id="lockTimer" role="timer" aria-label="Seat hold time remaining"></div>
+      </div>
+      <!-- The one gradient element on this screen -->
+      <button class="btn btn--cta btn--lg" id="proceedBtn" disabled>Proceed to Pay</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/seatmap.js' %}"></script>
+{% endblock %}

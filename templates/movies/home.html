@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CineBook — Book Movie Tickets Online{% endblock %}
+{% block meta_description %}Book movie tickets online for the latest Bollywood, Hollywood, and regional films. Choose your seats, pay securely.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/movies.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+
+  <!-- Hero: soft daylight wash, city pills -->
+  <section class="hero">
+    <div class="container hero__content">
+      <span class="hero__eyebrow">Now Playing in Your City</span>
+      <h1 class="hero__title">
+        Every great night<br>starts with a <em>ticket.</em>
+      </h1>
+      <p class="hero__subtitle">
+        Browse what's playing, pick the perfect seats, and get confirmed tickets in under two minutes.
+      </p>
+      <div class="hero__cities" id="heroCities" role="group" aria-label="Choose your city">
+        <!-- City pills populated by home.js -->
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <!-- Genre filters -->
+    <div class="filter-bar" id="genreFilter" role="group" aria-label="Genre filters">
+      <button class="chip active" data-genre="" aria-pressed="true">All Films</button>
+      <!-- Genre chips populated from /api/v1/movies/genres/ -->
+    </div>
+
+    <!-- Language filters -->
+    <div class="filter-bar" id="langFilter" role="group" aria-label="Language filters">
+      <button class="chip active" data-lang="" aria-pressed="true">All Languages</button>
+      <button class="chip" data-lang="Hindi" aria-pressed="false">Hindi</button>
+      <button class="chip" data-lang="English" aria-pressed="false">English</button>
+      <button class="chip" data-lang="Tamil" aria-pressed="false">Tamil</button>
+      <button class="chip" data-lang="Telugu" aria-pressed="false">Telugu</button>
+    </div>
+
+    <!-- Now Showing -->
+    <section aria-labelledby="nowShowingTitle">
+      <div class="section-header">
+        <h2 class="section-title" id="nowShowingTitle">Now Showing</h2>
+        <span class="section-header__meta" id="movieCount" role="status"></span>
+      </div>
+      <div class="movie-grid" id="movieGrid" aria-label="Movies now showing">
+        <!-- Skeleton placeholders while loading -->
+        <div class="skeleton skeleton--poster" aria-hidden="true"></div>
+        <div class="skeleton skeleton--poster" aria-hidden="true"></div>
+        <div class="skeleton skeleton--poster" aria-hidden="true"></div>
+        <div class="skeleton skeleton--poster" aria-hidden="true"></div>
+        <div class="skeleton skeleton--poster" aria-hidden="true"></div>
+        <div class="skeleton skeleton--poster" aria-hidden="true"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state hidden">
+        <svg width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <rect x="4" y="10" width="40" height="32" rx="6" stroke="currentColor" stroke-width="2"/>
+          <path d="M4 18h40M14 10V6M34 10V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="24" cy="30" r="7" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <h3>Nothing's playing here right now</h3>
+        <p>Try a different city, or clear your filters.</p>
+        <button class="btn btn--soft" id="clearFiltersBtn">Clear Filters</button>
+      </div>
+
+      <!-- Error state -->
+      <div id="errorState" class="empty-state hidden">
+        <svg width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+          <path d="M24 16v10M24 32v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>We couldn't load the movies</h3>
+        <p>Something went wrong on our end. Give it another try.</p>
+        <button class="btn btn--soft" id="retryBtn">Try Again</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}
