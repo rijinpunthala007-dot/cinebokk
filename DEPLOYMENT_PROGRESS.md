@@ -89,9 +89,24 @@ Resume point for an interrupted session. Each task lists status, what changed, a
 
 ---
 
+## ✅ Task 11 — Bake poster/trailer/cast into deploy (live media fix)
+- **Symptom:** on the live Render deploy, movies appear but posters are monogram placeholders and trailers/cast are missing.
+- **Root cause:** `poster_url`, `trailer_youtube_url`, and all `CastMember` rows were only ever set by hand in the local SQLite DB across earlier sessions. They were never captured into any command that runs on Render. `movie_media.py` (driving `apply_movie_media`) was all empty strings, and no command created `CastMember` rows at all.
+- **Critical gotcha found:** the live DB is *already seeded*, and `build.sh` runs `seed_movies --skip-if-seeded`, which early-returns when any Movie exists. So baking data only into `_create_movies()` would sit behind the skip guard and **never run on live**.
+- **Fix (Option A):** exported the exact poster/trailer/cast values from the local DB (source of truth — richer than the old hardcoded `cast_info`, e.g. Spider-Man 4 cast, Avatar's Sigourney Weaver) and baked them into a `MEDIA_AND_CAST` constant in `seed_movies.py`. Added `_apply_media_and_cast()` that runs on **both** paths — the full seed AND the `--skip-if-seeded` early return — so it reaches the already-seeded live DB.
+- **Idempotency:** `poster_url`/`trailer_youtube_url` saved only when the value differs (`update_fields`); `CastMember` via `update_or_create` keyed on `(movie, name)`. `backdrop_url` deliberately left to `sync_backdrops` (single owner). No `--clear`, no deletes.
+- **Verified locally (exact live code path, `--skip-if-seeded`):**
+  - Re-run on the intact local DB → `0 new / 0 movies updated`, counts steady at 20/20/48 across repeated runs (no duplicate cast).
+  - Simulated live state (nulled all media, deleted 48 cast, movies kept) → single run healed it to **20 posters, 20 trailers, 48 cast (48 new, 20 updated)**. This is what the next deploy will do.
+- **No build.sh change needed** — the existing `seed_movies --skip-if-seeded` line now carries the media/cast upsert.
+- Files: `apps/movies/management/commands/seed_movies.py`.
+
+---
+
 ## Summary flags
 - **Total static asset size: 9.0 MB** — well under the 100MB concern. Safe to commit to git for Render deploy.
 - **MySQL-specific SQL:** none needing manual attention (only `charset`/`sql_mode` OPTIONS, already gated in the MySQL branch).
 - **Postgres driver:** psycopg3 (`psycopg[binary]>=3.2.10,<3.3`), Python pinned to 3.12.7 via `runtime.txt`. `DATABASE_URL` parsing confirmed → correct `postgresql` ENGINE. Local connection not testable on the Windows/SQLite dev box — validated on Render deploy.
 - **Seed-on-deploy:** guarded one-time seed via `build.sh`. Showtimes dated to first deploy and do NOT roll forward automatically (see Task 10 limitation above).
+- **Poster/trailer/cast:** baked into `seed_movies` and applied on every deploy via the `--skip-if-seeded` path (Task 11) — heals the already-seeded live DB. Idempotent (`update_or_create`).
 - **Repo is now a git repository** — `.gitignore` in place; `.env`, `db.sqlite3`, `.claude/`, `staticfiles/`, local `backdrops/`+`posters/` source art all excluded. Ready for `git add .` + commit.
