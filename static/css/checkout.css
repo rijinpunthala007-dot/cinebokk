@@ -143,3 +143,10 @@
   .checkout-grid { grid-template-columns: 1fr; }
   .summary-card { position: static; order: -1; }
 }
+
+/* Mobile QA pass (additive): stack the confirmation actions full-width so the
+   three buttons don't wrap into a lopsided 2+1 at 360px. */
+@media (max-width: 480px) {
+  .ticket__actions { flex-direction: column; }
+  .ticket__actions > .btn { width: 100%; }
+}

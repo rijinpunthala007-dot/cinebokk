@@ -117,6 +117,26 @@ Resume point for an interrupted session. Each task lists status, what changed, a
 
 ---
 
+---
+
+## ✅ Task 13 — Mobile QA pass (360 / 390 / 768 px)
+- **Scope:** senior-frontend mobile audit across the 7 screen groups. Constraint honored — **additive media queries only, no desktop-layout rewrites**. The app was already well-built for mobile (16px inputs to stop iOS zoom, `dvh`, horizontally-scrolling date + cast strips, collapsing grids, full-width toasts), so this was targeted gap-filling.
+- **Note on method:** breakpoints reasoned from the actual CSS/markup (fixed widths, grid column counts, wrap-vs-scroll, overflow sources), not a live device render. Each fix below names the concrete failure it addresses.
+
+**Issues found & fixed (each a small `@media` addition):**
+1. **Header / City selector** — the JS-anchored city dropdown (`min/max 220–300px`, inline `left`) could run off the right edge at 360px. → `.city-modal` pinned to both gutters, `max-width:none` at ≤480px. *(`main.css`)*
+2. **Home / filter chips** — `.filter-bar` used `flex-wrap:wrap`, stacking genre/language chips into 2–3 rows on narrow screens. → switched to horizontal scroll (`nowrap` + `overflow-x:auto`, hidden scrollbar) with a right-edge fade mask; chips `flex-shrink:0`, `min-height:40px` tap target at ≤640px. *(`main.css`)*
+   - **Poster grid** confirmed already 2-col at 360–390 (`minmax(160px,1fr)` vs ~328px available) — no change.
+3. **Movie Detail** — poster/info already stacks and cast strip already touch-scrolls (OK). Fixed: trailer modal footer (help text + YouTube button) collided below ~400px → allowed to wrap + left-align; trimmed modal-overlay gutter to `sp-3` so the video card gets full width at 360px. *(`movies.css`)*
+4. **Theater Selection** — cards already stack and date strip already scrolls (OK). Fixed: hover info tooltip (`left:0; max-width:320px`) overflowed the right edge on a 360px card → capped to `calc(100vw - sp-8)`. *(`theaters.css`)*
+5. **Seat Map** — seats were shrunk to **26px** at ≤640px, below a reliable finger tap. → bumped to **30px** (recliner 33→36); the `.seat-area` already scrolls horizontally (`overflow-x:auto; min-content`), so wider rows scroll rather than becoming un-tappable. Sticky footer behavior unchanged. *(`seatmap.css`)*
+6. **Checkout / Confirmation** — inputs already full-width with correct mobile keyboards (`inputmode="numeric"` on card/expiry/cvv, `type="email"` on register); grid collapses at 900px (OK). Fixed: the 3 confirmation-ticket buttons wrapped into a lopsided 2+1 at 360px → stacked full-width at ≤480px. *(`checkout.css`)*
+7. **Auth / My Bookings** — inputs already full-width (`.form-input:100%`), register name-row collapses at 768px, status filter now inherits the horizontal-scroll chip fix from #2. No dedicated change needed.
+- **General checks:** no unintended horizontal scrollbar introduced (all new overflow is intentional `overflow-x` on strips); body text stays ≥ `--text-xs` (0.75rem); images scale proportionally; modals remain centered.
+- **Files:** `static/css/main.css`, `static/css/movies.css`, `static/css/theaters.css`, `static/css/seatmap.css`, `static/css/checkout.css`. (WhiteNoise `ManifestStaticFilesStorage` → `collectstatic` re-hashes on deploy; no template changes required.)
+
+---
+
 ## Summary flags
 - **Total static asset size: 9.0 MB** — well under the 100MB concern. Safe to commit to git for Render deploy.
 - **MySQL-specific SQL:** none needing manual attention (only `charset`/`sql_mode` OPTIONS, already gated in the MySQL branch).

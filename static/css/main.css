@@ -495,3 +495,33 @@ h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
   /* The ticket-stub icon carries the brand; the freed width keeps search tappable */
   .navbar__logo-text { display: none; }
 }
+
+/* ============ 16. MOBILE QA PASS (additive — 360 / 390 / 768) ============ */
+
+/* Filter chips: scroll horizontally instead of wrapping into 2–3 stacked rows
+   on narrow screens. Right-edge fade hints there's more to swipe. */
+@media (max-width: 640px) {
+  .filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 92%, transparent);
+            mask-image: linear-gradient(to right, #000 92%, transparent);
+    padding-bottom: 2px; /* room for the fade so descenders aren't clipped */
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  /* Don't let chips compress; keep them a comfortable tap height (~40px) */
+  .filter-bar .chip { flex-shrink: 0; min-height: 40px; }
+}
+
+/* City selector: the anchored 300px dropdown can run off the right edge on a
+   360px screen (JS sets an inline left). Pin it to both gutters full-width. */
+@media (max-width: 480px) {
+  .city-modal {
+    left: var(--sp-4) !important;
+    right: var(--sp-4) !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+}

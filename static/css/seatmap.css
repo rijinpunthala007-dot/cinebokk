@@ -207,8 +207,11 @@
 /* ============ RESPONSIVE — stress-tested at 360px ============ */
 @media (max-width: 640px) {
   .page-content--seatmap { padding-bottom: 220px; }
-  .seat { width: 26px; height: 25px; border-radius: 8px 8px 4px 4px; }
-  .seat--recliner { width: 33px; height: 28px; }
+  /* Seats were 26px here — below a reliable finger tap. Bumped to 30px; the
+     .seat-area already scrolls horizontally (overflow-x:auto, min-content),
+     so wider rows just scroll instead of becoming un-tappable. */
+  .seat { width: 30px; height: 28px; border-radius: 8px 8px 4px 4px; }
+  .seat--recliner { width: 36px; height: 31px; }
   .seat-row { gap: 5px; }
   .seat-grid { gap: 6px; padding: 0 var(--sp-2); }
   .seat-aisle { width: 14px; }

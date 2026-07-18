@@ -243,4 +243,10 @@
   .theater-card { padding: var(--sp-4); }
   .theater-card__header { flex-direction: column; gap: var(--sp-2); }
   .show-chip { min-width: 84px; padding: var(--sp-2) var(--sp-3); }
+  /* Tooltip is anchored left:0 with a 320px min/max; on a 360px card that
+     runs off the right edge. Cap it to the viewport width. */
+  .theater-info-tooltip {
+    min-width: 0;
+    max-width: calc(100vw - var(--sp-8));
+  }
 }

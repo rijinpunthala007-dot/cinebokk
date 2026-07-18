@@ -332,3 +332,17 @@
   .person-modal__content { flex-direction: column; align-items: center; text-align: center; }
   .movie-backdrop { height: 180px; }
 }
+
+/* ---- Mobile QA pass (additive) ---- */
+@media (max-width: 640px) {
+  /* Give the video card the full viewport width; the default sp-6 gutter
+     wastes ~40px it can't spare at 360px. */
+  .modal-overlay { padding: var(--sp-3); }
+  /* Trailer footer: the help text + YouTube button sit side-by-side and
+     collide below ~400px. Let them stack and left-align. */
+  .modal-card--video .trailer-modal__footer {
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    justify-content: flex-start !important;
+  }
+}
