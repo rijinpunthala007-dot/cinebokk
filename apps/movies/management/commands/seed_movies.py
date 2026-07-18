@@ -32,8 +32,24 @@ class Command(BaseCommand):
             action="store_true",
             help="Clear all existing data before seeding.",
         )
+        parser.add_argument(
+            "--skip-if-seeded",
+            action="store_true",
+            help=(
+                "No-op if the database already contains movies. Used on deploy "
+                "(build.sh) so the seed runs once on an empty DB and is safely "
+                "skipped on every subsequent deploy."
+            ),
+        )
 
     def handle(self, *args, **options):
+        if options["skip_if_seeded"] and Movie.objects.exists():
+            self.stdout.write(self.style.NOTICE(
+                f"Database already seeded ({Movie.objects.count()} movies present) "
+                f"- skipping seed_movies."
+            ))
+            return
+
         if options["clear"]:
             self.stdout.write(self.style.WARNING("Clearing existing data..."))
             ShowSeat.objects.all().delete()
@@ -546,27 +562,27 @@ class Command(BaseCommand):
                     fmt = formats[(s_idx + t_idx) % len(formats)]
                     cancellation = ((s_idx + t_idx) % 2 == 0)
 
-                        show, created = Show.objects.get_or_create(
-                            movie=movie,
-                            screen=screen,
-                            start_time=start_dt,
-                            defaults={
-                                "end_time": start_dt + timedelta(minutes=movie.duration_minutes),
-                                "date": show_date,
-                                "language": movie.language,
-                                "format": fmt,
-                                "is_cancellable": cancellation,
-                                "is_active": True,
-                            },
-                        )
+                    show, created = Show.objects.get_or_create(
+                        movie=movie,
+                        screen=screen,
+                        start_time=start_dt,
+                        defaults={
+                            "end_time": start_dt + timedelta(minutes=movie.duration_minutes),
+                            "date": show_date,
+                            "language": movie.language,
+                            "format": fmt,
+                            "is_cancellable": cancellation,
+                            "is_active": True,
+                        },
+                    )
 
-                        if created:
-                            shows_created += 1
-                            seats = Seat.objects.filter(screen=screen)
-                            show_seats = [
-                                ShowSeat(show=show, seat=seat, status=ShowSeat.StatusChoices.AVAILABLE)
-                                for seat in seats
-                            ]
-                            ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
+                    if created:
+                        shows_created += 1
+                        seats = Seat.objects.filter(screen=screen)
+                        show_seats = [
+                            ShowSeat(show=show, seat=seat, status=ShowSeat.StatusChoices.AVAILABLE)
+                            for seat in seats
+                        ]
+                        ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
 
         self.stdout.write(f"  + {shows_created} shows created across now-showing movies")

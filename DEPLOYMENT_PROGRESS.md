@@ -73,8 +73,25 @@ Resume point for an interrupted session. Each task lists status, what changed, a
 
 ---
 
+## ✅ Task 10 — Seed-on-deploy (no Shell access on Render free tier)
+- Render free tier has no Shell, so one-off management commands were moved into `build.sh` to run on every deploy.
+- **Idempotency audit:** core entities (movies, cities, theaters, screens, seats, genres) all use `get_or_create` — safe to re-run. Destructive wipe is gated behind `--clear` (NOT used in build.sh).
+- **Seed-once guard (Option 1):** added `--skip-if-seeded` to `seed_movies` — no-ops if any `Movie` exists. So it seeds once on the first (empty-DB) deploy and is skipped on every deploy after. Live-tested against the 20-movie local DB: correctly skipped.
+- **Pre-existing bug fixed:** `seed_movies.py` had an `IndentationError` (shows block, ~line 549) that made it fail to compile — would have crashed the first deploy. Fixed + compile-verified.
+- **build.sh additions (after `migrate`):** `seed_movies --skip-if-seeded`, `sync_backdrops`, `apply_movie_media`. The latter two are naturally idempotent (file copy + URL writes) so they run unguarded every deploy.
+- **Dead code removed:** `seed_data.py` (a near-duplicate of `seed_movies`, zero references anywhere) deleted along with its stale `.pyc`.
+- Files: `build.sh`, `apps/movies/management/commands/seed_movies.py`, `apps/movies/management/commands/seed_data.py` (deleted).
+
+### ⚠️ KNOWN LIMITATION — showtimes are dated relative to first deploy
+- `seed_movies` builds shows for `date.today()` … `today + 3 days`, computed at seed time. Because of the seed-once guard, this runs **only on the first deploy** and never regenerates.
+- **Consequence:** those showtimes are fixed to the first-deploy date. As days pass they become **past dates** and will not roll forward automatically. If the movie-list / shows view filters to upcoming showtimes, the app can appear to have no available shows a few days after deploy.
+- **Fix if/when this becomes a problem:** add a lightweight "roll shows forward" management command (delete/rebuild only future-dated shows, or shift existing show `start_time`/`date` to the current window) and either run it manually via a redeploy step or schedule it with `django-crontab`. This is a *refresh*, NOT a re-seed — do not use `--clear` or drop the seed-once guard.
+
+---
+
 ## Summary flags
 - **Total static asset size: 9.0 MB** — well under the 100MB concern. Safe to commit to git for Render deploy.
 - **MySQL-specific SQL:** none needing manual attention (only `charset`/`sql_mode` OPTIONS, already gated in the MySQL branch).
-- **Postgres driver:** psycopg3 (`psycopg[binary]==3.2.3`), Python pinned to 3.12.7 via `runtime.txt`. `DATABASE_URL` parsing confirmed → correct `postgresql` ENGINE. Local connection not testable on the Windows/SQLite dev box — validated on Render deploy.
+- **Postgres driver:** psycopg3 (`psycopg[binary]>=3.2.10,<3.3`), Python pinned to 3.12.7 via `runtime.txt`. `DATABASE_URL` parsing confirmed → correct `postgresql` ENGINE. Local connection not testable on the Windows/SQLite dev box — validated on Render deploy.
+- **Seed-on-deploy:** guarded one-time seed via `build.sh`. Showtimes dated to first deploy and do NOT roll forward automatically (see Task 10 limitation above).
 - **Repo is now a git repository** — `.gitignore` in place; `.env`, `db.sqlite3`, `.claude/`, `staticfiles/`, local `backdrops/`+`posters/` source art all excluded. Ready for `git add .` + commit.
