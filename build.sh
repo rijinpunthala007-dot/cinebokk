@@ -32,3 +32,10 @@ python manage.py sync_backdrops
 # Apply manual poster/trailer URLs from MOVIE_MEDIA. Idempotent — skips blanks
 # and only overwrites when values change.
 python manage.py apply_movie_media
+
+# Roll currently-released movies' shows into the current 7-day window.
+# Idempotent.
+# Also pinged daily via POST /api/v1/internal/refresh-showtimes/ by an external
+# cron service, since deploys alone don't happen often enough to keep this
+# fresh (see DEPLOYMENT_PROGRESS.md).
+python manage.py refresh_showtimes

@@ -11,6 +11,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
+from apps.shows.views import RefreshShowtimesView
+
 # Customise the admin site header
 admin.site.site_header = "CineBook Admin"
 admin.site.site_title = "CineBook"
@@ -27,6 +29,9 @@ urlpatterns = [
     path("api/v1/bookings/", include("apps.bookings.urls", namespace="bookings")),
     path("api/v1/dashboard/", include("apps.dashboard.urls", namespace="dashboard")),
     path("api/v1/cities/", include("apps.theaters.urls", namespace="theaters")),
+
+    # Internal — pinged by an external cron service (see DEPLOYMENT_PROGRESS.md)
+    path("api/v1/internal/refresh-showtimes/", RefreshShowtimesView.as_view(), name="refresh_showtimes"),
 
     # Frontend template views
     path("", include("apps.movies.frontend_urls")),

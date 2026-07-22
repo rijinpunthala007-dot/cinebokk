@@ -320,6 +320,12 @@ if not DEBUG:
 # ---------------------------------------------------------------------------
 SEAT_LOCK_MINUTES: int = env.int("SEAT_LOCK_MINUTES", default=5)
 
+# Shared secret required by POST /api/v1/internal/refresh-showtimes/, checked
+# against an X-Cron-Secret header or ?token= query param. Must also be set in
+# the external cron service's request config. Empty by default so the
+# endpoint fails closed (403) until explicitly configured.
+CRON_SECRET: str = env.str("CRON_SECRET", default="")
+
 # ---------------------------------------------------------------------------
 # Django Crontab (Celery-free background tasks)
 # ---------------------------------------------------------------------------

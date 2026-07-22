@@ -86,6 +86,7 @@ Resume point for an interrupted session. Each task lists status, what changed, a
 - `seed_movies` builds shows for `date.today()` … `today + 3 days`, computed at seed time. Because of the seed-once guard, this runs **only on the first deploy** and never regenerates.
 - **Consequence:** those showtimes are fixed to the first-deploy date. As days pass they become **past dates** and will not roll forward automatically. If the movie-list / shows view filters to upcoming showtimes, the app can appear to have no available shows a few days after deploy.
 - **Fix if/when this becomes a problem:** add a lightweight "roll shows forward" management command (delete/rebuild only future-dated shows, or shift existing show `start_time`/`date` to the current window) and either run it manually via a redeploy step or schedule it with `django-crontab`. This is a *refresh*, NOT a re-seed — do not use `--clear` or drop the seed-once guard.
+- **✅ Resolved by Task 14** — see below.
 
 ---
 
@@ -137,10 +138,22 @@ Resume point for an interrupted session. Each task lists status, what changed, a
 
 ---
 
+## ✅ Task 14 — Resolve Task 10 limitation: showtimes stay fresh without a redeploy
+- **Problem:** Task 10 noted showtimes are fixed to the first-deploy date and never roll forward on their own — Render's free tier has no Shell and no persistent process for `django-crontab`, so a redeploy was the only way to refresh them.
+- **Fix — shared refresh logic:** `apps/shows/services.py::refresh_showtimes()` rolls every `Show` belonging to a currently-released movie (`release_date <= today` — `Movie` has no persisted `is_now_showing` field; `seed_movies.py` only ever used that name as a transient, unsaved marker) into the current `[today, today+6]` window, preserving each show's time-of-day and its ordering relative to the other distinct show dates. Idempotent: a show already sitting in its correct slot maps to the same date again (a fixed point), so repeat calls in the same day are no-ops beyond re-confirming dates.
+- **Two callers, one implementation:**
+  - `python manage.py refresh_showtimes` — now also runs on every deploy via `build.sh` (after `apply_movie_media`).
+  - `POST /api/v1/internal/refresh-showtimes/` — an HTTP endpoint an external free cron service (e.g. [cron-job.org](https://cron-job.org)) can ping daily, so showtimes stay current indefinitely **without any redeploy at all**.
+- **Endpoint security:** requires a shared secret, checked against the `CRON_SECRET` env var — accepted either as header `X-Cron-Secret: <value>` or query param `?token=<value>` (timing-safe comparison via `constant_time_compare`). Missing/incorrect/unset secret → `403 {"status": "forbidden"}`. **`CRON_SECRET` must be set in both places for the endpoint to work:** Render's environment variables (server-side check) AND the external cron service's request config (header or query param it sends).
+- **Response shape:** `{"status": "ok", "shows_updated": N}` on success, where `N` is the count of shows actually moved (0 on repeat same-day pings) — gives cron-job.org's dashboard a clear per-run success/failure history.
+- **Files:** `apps/shows/services.py` (new), `apps/shows/management/commands/refresh_showtimes.py` (new), `apps/shows/views.py` (`RefreshShowtimesView`), `cinebook/urls.py` (route), `cinebook/settings.py` (`CRON_SECRET`), `.env.example`, `build.sh`.
+
+---
+
 ## Summary flags
 - **Total static asset size: 9.0 MB** — well under the 100MB concern. Safe to commit to git for Render deploy.
 - **MySQL-specific SQL:** none needing manual attention (only `charset`/`sql_mode` OPTIONS, already gated in the MySQL branch).
 - **Postgres driver:** psycopg3 (`psycopg[binary]>=3.2.10,<3.3`), Python pinned to 3.12.7 via `runtime.txt`. `DATABASE_URL` parsing confirmed → correct `postgresql` ENGINE. Local connection not testable on the Windows/SQLite dev box — validated on Render deploy.
-- **Seed-on-deploy:** guarded one-time seed via `build.sh`. Showtimes dated to first deploy and do NOT roll forward automatically (see Task 10 limitation above).
+- **Seed-on-deploy:** guarded one-time seed via `build.sh`. Showtimes now roll forward automatically — on every deploy via `build.sh` and daily via the `POST /api/v1/internal/refresh-showtimes/` cron endpoint (Task 10 limitation resolved by Task 14).
 - **Poster/trailer/cast:** baked into `seed_movies` and applied on every deploy via the `--skip-if-seeded` path (Task 11) — heals the already-seeded live DB. Idempotent (`update_or_create`).
 - **Repo is now a git repository** — `.gitignore` in place; `.env`, `db.sqlite3`, `.claude/`, `staticfiles/`, local `backdrops/`+`posters/` source art all excluded. Ready for `git add .` + commit.

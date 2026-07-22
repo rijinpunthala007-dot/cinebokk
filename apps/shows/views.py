@@ -6,7 +6,9 @@ CineBook — Shows API Views
 import logging
 from datetime import date, timedelta
 
+from django.conf import settings
 from django.utils import timezone
+from django.utils.crypto import constant_time_compare
 from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny
@@ -15,6 +17,7 @@ from rest_framework.views import APIView
 
 from apps.movies.views import MoviesReadThrottle
 from apps.shows.models import Show, ShowSeat
+from apps.shows.services import refresh_showtimes
 from .serializers import ShowDetailSerializer, ShowListSerializer, ShowSeatSerializer
 
 logger = logging.getLogger("apps.shows")
@@ -150,3 +153,37 @@ class ShowSeatMapView(APIView):
             "total_seats": show_seats.count(),
             "available_seats": show_seats.filter(status=ShowSeat.StatusChoices.AVAILABLE).count(),
         })
+
+
+class RefreshShowtimesView(APIView):
+    """
+    POST /api/v1/internal/refresh-showtimes/
+    Meant to be pinged daily by an external free cron service (e.g.
+    cron-job.org) so currently-released movies' shows stay in the current
+    [today, today+6] window without a manual redeploy — see
+    apps.shows.services.refresh_showtimes.
+
+    Auth: shared secret via either
+    - header  X-Cron-Secret: <CRON_SECRET>
+    - query param  ?token=<CRON_SECRET>
+    Rejects with 403 if CRON_SECRET is unset server-side, or the caller's
+    value is missing/incorrect.
+    """
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = []
+
+    def post(self, request) -> Response:
+        expected = getattr(settings, "CRON_SECRET", "")
+        provided = request.headers.get("X-Cron-Secret") or request.query_params.get("token", "")
+
+        if not expected or not provided or not constant_time_compare(provided, expected):
+            logger.warning("Rejected refresh-showtimes request: bad or missing CRON_SECRET.")
+            return Response(
+                {"status": "forbidden"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        updated = refresh_showtimes()
+        return Response({"status": "ok", "shows_updated": updated})
