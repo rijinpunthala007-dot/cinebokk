@@ -181,7 +181,16 @@ class RefreshShowtimesView(APIView):
         if not expected or not provided or not constant_time_compare(provided, expected):
             logger.warning("Rejected refresh-showtimes request: bad or missing CRON_SECRET.")
             return Response(
-                {"status": "forbidden"},
+                {
+                    "status": "forbidden",
+                    # TEMP DEBUG — remove once the 403 is diagnosed. Never
+                    # reveals the actual secret, only whether Render's
+                    # running process has one loaded at all and its length,
+                    # to catch "set in dashboard but process not restarted".
+                    "server_secret_configured": bool(expected),
+                    "server_secret_length": len(expected),
+                    "provided_length": len(provided),
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
 
