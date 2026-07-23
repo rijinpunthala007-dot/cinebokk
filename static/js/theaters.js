@@ -107,8 +107,8 @@
       if (bar) {
         bar.innerHTML = `
           <div class="movie-bar__poster" style="--ph-hue:${titleHue(data.title)};">
-            ${data.poster
-              ? `<img src="${escHtml(data.poster)}" alt="${title} poster">`
+            ${(data.poster_url || data.poster)
+              ? `<img src="${escHtml(data.poster_url || data.poster)}" alt="${title} poster">`
               : `<span class="movie-bar__monogram" role="img" aria-label="${title} poster placeholder">${escHtml(data.title[0])}</span>`
             }
           </div>
