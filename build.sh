@@ -33,9 +33,13 @@ python manage.py sync_backdrops
 # and only overwrites when values change.
 python manage.py apply_movie_media
 
-# Roll currently-released movies' shows into the current 7-day window.
+# Roll all movies' shows into the current 7-day window.
 # Idempotent.
 # Also pinged daily via POST /api/v1/internal/refresh-showtimes/ by an external
 # cron service, since deploys alone don't happen often enough to keep this
 # fresh (see DEPLOYMENT_PROGRESS.md).
 python manage.py refresh_showtimes
+
+# Create shows for any movies that were seeded without shows (the 13 formerly-
+# "upcoming" movies). Idempotent — skips movies that already have shows.
+python manage.py backfill_shows

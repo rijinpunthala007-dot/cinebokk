@@ -25,14 +25,13 @@ ROLLING_WINDOW_DAYS = 7  # today .. today+6
 
 def refresh_showtimes() -> int:
     """
-    Roll every Show belonging to a currently-released movie into the current
-    [today, today+6] window, preserving each show's time-of-day and its
-    ordering relative to the other distinct show dates.
+    Roll every Show into the current [today, today+6] window, preserving
+    each show's time-of-day and its ordering relative to the other distinct
+    show dates.
 
-    Movie has no persisted `is_now_showing` flag — seed_movies.py only ever
-    used that name as a transient, unsaved marker (release_date in the past =
-    now showing, release_date in the future = upcoming; see its MOVIE_DATA).
-    `release_date__lte=today` is the real, queryable equivalent.
+    For demo purposes all movies are treated as bookable — there is no
+    release_date filter.  Only movies that already have Show records are
+    affected (i.e. every movie that was seeded or backfilled).
 
     Idempotent: once a show's date already matches its target slot in the
     window, re-running maps it to the same date again — a fixed point. Safe
@@ -41,7 +40,7 @@ def refresh_showtimes() -> int:
     today = timezone.localdate()
 
     shows = list(
-        Show.objects.filter(movie__release_date__lte=today).select_related("movie")
+        Show.objects.select_related("movie").all()
     )
     if not shows:
         return 0

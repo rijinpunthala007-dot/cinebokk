@@ -148,11 +148,11 @@ Resume point for an interrupted session. Each task lists status, what changed, a
 - **Response shape:** `{"status": "ok", "shows_updated": N}` on success, where `N` is the count of shows actually moved (0 on repeat same-day pings) — gives cron-job.org's dashboard a clear per-run success/failure history.
 - **Files:** `apps/shows/services.py` (new), `apps/shows/management/commands/refresh_showtimes.py` (new), `apps/shows/views.py` (`RefreshShowtimesView`), `cinebook/urls.py` (route), `cinebook/settings.py` (`CRON_SECRET`), `.env.example`, `build.sh`.
 
-### ⚠️ Follow-up — the rolling window only ever covers as many days as the seed has distinct dates
-- **Symptom (live, 2026-07-22):** today's date tab showed no shows; live query confirmed `date=2026-07-22` → 0 shows, `date=2026-07-26..28` → 0 shows, while `2026-07-23..25` had 41 bookable shows.
-- **Cause:** `seed_movies.py::_create_shows` only ever generates shows across **4 distinct calendar days** (`for day_offset in range(4)`), computed once at first-seed time. `refresh_showtimes()` can only *remap* the dates a Show already has — it can't manufacture shows for days that were never seeded. So at most 3–4 of the 7 slots in the `[today, today+6]` window are ever populated at a time; which 3–4 depends on where that cluster has rotated to since the last refresh. This is a structural limitation, not a one-off bug — flagging it in case the empty-tab symptom recurs.
-- **Applied now:** re-triggered a deploy so `refresh_showtimes` re-runs against the current real date, pulling the cluster back so today has shows again.
-- **Not yet done (deferred):** actually filling all 7 days would need `seed_movies` (or a new backfill command) to generate a full week of shows — bigger change, deferred until it's decided this is worth doing.
+### Investigated — "no shows today" was expected behavior, not a bug (2026-07-22)
+- **Symptom reported:** today's date tab showed no shows via `/api/v1/shows/?date=2026-07-22` (count 0), while `2026-07-23..25` had 41 bookable shows.
+- **False lead (ruled out):** initially suspected `refresh_showtimes()`'s rolling-window remap was broken/drifting (this section previously documented that theory and a "fix" redeploy). That redeploy landed and reported `shows_updated: 0` — which turned out to be *correct*, not evidence of a stuck bug.
+- **Actual cause:** `/api/v1/shows/` (`ShowListView`) unconditionally filters `start_time__gt=now`, regardless of the `date` param. Verified via `GET /api/v1/shows/{id}/` (no such filter) that today's shows for all 7 now-showing movies exist, correctly dated `2026-07-22`, spanning the day's showtime slots — every one simply has `is_bookable: false` because by the time this was checked (11:30pm+ IST) the last slot (10:30pm) had already started. `is_bookable = is_active and start_time > now` (`apps/shows/models.py:110`). The list endpoint's "0 results" reflected reality (nothing left to book today), not missing/broken data.
+- **Takeaway:** `refresh_showtimes()` was working correctly the whole time. No code fix was needed. Tomorrow's (and the next 2 days') shows remain fully bookable at all times before their own start_time.
 
 ---
 
