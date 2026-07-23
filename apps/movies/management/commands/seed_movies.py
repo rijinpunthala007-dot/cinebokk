@@ -232,6 +232,28 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        # Auto-detect and fix duplicate seats from previous buggy runs
+        has_duplicates = False
+        if Screen.objects.exists():
+            for screen in Screen.objects.all():
+                if screen.seats.count() > 160:
+                    has_duplicates = True
+                    break
+        if has_duplicates:
+            self.stdout.write(self.style.WARNING("Duplicate seats detected! Clearing and resetting theater structures..."))
+            from django.db import connection
+            from apps.bookings.models import BookingSeat, Booking
+            with connection.cursor() as cursor:
+                cursor.execute(f"DELETE FROM {BookingSeat._meta.db_table};")
+                cursor.execute(f"DELETE FROM {Booking._meta.db_table};")
+                cursor.execute(f"DELETE FROM {ShowSeat._meta.db_table};")
+                cursor.execute(f"DELETE FROM {Show._meta.db_table};")
+                cursor.execute(f"DELETE FROM {Seat._meta.db_table};")
+                cursor.execute(f"DELETE FROM {SeatCategory._meta.db_table};")
+                cursor.execute(f"DELETE FROM {Screen._meta.db_table};")
+                cursor.execute(f"DELETE FROM {Theater._meta.db_table};")
+                cursor.execute(f"DELETE FROM {City._meta.db_table};")
+
         if options["clear"]:
             self.stdout.write(self.style.WARNING("Clearing existing data..."))
             ShowSeat.objects.all().delete()
@@ -547,6 +569,10 @@ class Command(BaseCommand):
                     name=s_data["name"],
                     defaults={"total_capacity": s_data["capacity"]},
                 )
+
+                # Skip seat seeding if the screen already has seats
+                if Seat.objects.filter(screen=screen).exists():
+                    continue
 
                 seat_count = 0
                 for cat_name, price in s_data["categories"]:
