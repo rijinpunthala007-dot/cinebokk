@@ -123,6 +123,14 @@ class Command(BaseCommand):
                     return fmt
             return "2D"
 
+        # Prefetch seats to avoid querying Seat for every screen/show combo
+        from collections import defaultdict
+        seats_by_screen = defaultdict(list)
+        for seat in Seat.objects.select_related("category").all():
+            seats_by_screen[seat.screen_id].append(seat)
+
+        show_seats_to_create = []
+
         for day_offset in range(7):
             show_date = today + timedelta(days=day_offset)
             
@@ -166,17 +174,19 @@ class Command(BaseCommand):
 
                     if created:
                         shows_created += 1
-                        screen_seats = Seat.objects.filter(screen=screen)
-                        show_seats = [
-                            ShowSeat(
-                                show=show,
-                                seat=seat,
-                                status=ShowSeat.StatusChoices.AVAILABLE,
+                        screen_seats = seats_by_screen[screen.id]
+                        for seat in screen_seats:
+                            show_seats_to_create.append(
+                                ShowSeat(
+                                    show=show,
+                                    seat=seat,
+                                    status=ShowSeat.StatusChoices.AVAILABLE,
+                                )
                             )
-                            for seat in screen_seats
-                        ]
-                        ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
-                        seats_created += len(show_seats)
+                            seats_created += 1
+
+        if show_seats_to_create:
+            ShowSeat.objects.bulk_create(show_seats_to_create, batch_size=2000, ignore_conflicts=True)
 
         self.stdout.write(self.style.SUCCESS(
             f"\n  [DONE] Created {shows_created} shows ({seats_created} show-seats)\n"
