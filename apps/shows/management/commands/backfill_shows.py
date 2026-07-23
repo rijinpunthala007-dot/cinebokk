@@ -83,20 +83,24 @@ class Command(BaseCommand):
             return
 
         if not keep:
-            # Must clear bookings first — BookingSeat has a PROTECT FK to ShowSeat
+            from django.db import connection
             from apps.bookings.models import BookingSeat, Booking
-            old_bseats = BookingSeat.objects.count()
-            old_bookings = Booking.objects.count()
-            BookingSeat.objects.all().delete()
-            Booking.objects.all().delete()
 
+            old_bookings = Booking.objects.count()
+            old_bseats = BookingSeat.objects.count()
             old_shows = Show.objects.count()
             old_seats = ShowSeat.objects.count()
-            ShowSeat.objects.all().delete()
-            Show.objects.all().delete()
+
+            # Bypasses Django's ORM row-loading deletion collector
+            with connection.cursor() as cursor:
+                cursor.execute(f"DELETE FROM {BookingSeat._meta.db_table};")
+                cursor.execute(f"DELETE FROM {Booking._meta.db_table};")
+                cursor.execute(f"DELETE FROM {ShowSeat._meta.db_table};")
+                cursor.execute(f"DELETE FROM {Show._meta.db_table};")
+
             self.stdout.write(self.style.WARNING(
                 f"  - Cleared {old_bookings} bookings, {old_bseats} booking-seats, "
-                f"{old_shows} shows, {old_seats} show-seats."
+                f"{old_shows} shows, {old_seats} show-seats (direct SQL)."
             ))
 
         today = date.today()
