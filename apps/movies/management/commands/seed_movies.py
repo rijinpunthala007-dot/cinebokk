@@ -812,47 +812,60 @@ class Command(BaseCommand):
         if not screens:
             return
 
-        show_times = [time(10, 30), time(13, 45), time(17, 0), time(20, 15), time(22, 30)]
-        formats = ["IMAX", "4K LASER DOLBY 7.1", "4DX", "PXL", "LUXE", "2D"]
+        # BookMyShow-style: every movie plays at every screen, 2-3 times/day, 7 days
+        all_slots = [time(10, 0), time(13, 15), time(16, 30), time(19, 45), time(22, 30)]
+        formats_map = {
+            "IMAX": "IMAX", "4DX": "4DX", "PXL": "PXL",
+            "LUXE": "LUXE", "DOLBY": "4K LASER DOLBY 7.1",
+        }
+
+        def screen_format(name):
+            for key, fmt in formats_map.items():
+                if key in name.upper():
+                    return fmt
+            return "2D"
 
         shows_created = 0
 
-        for day_offset in range(4):
-            show_date = date.today() + timedelta(days=day_offset)
+        for m_idx, movie in enumerate(movies):
+            for day_offset in range(7):
+                show_date = date.today() + timedelta(days=day_offset)
 
-            for s_idx, screen in enumerate(screens):
-                for m_step in range(3):
-                    movie = movies[(s_idx * 3 + m_step + day_offset * 5) % len(movies)]
-                    t_idx = (s_idx + m_step + day_offset) % len(show_times)
-                    show_time = show_times[t_idx]
-                    start_dt = timezone.make_aware(
-                        timezone.datetime.combine(show_date, show_time)
-                    )
+                for s_idx, screen in enumerate(screens):
+                    fmt = screen_format(screen.name)
+                    base = (m_idx + s_idx + day_offset) % len(all_slots)
+                    num_slots = 3 if (m_idx + s_idx) % 3 != 0 else 2
 
-                    fmt = formats[(s_idx + t_idx) % len(formats)]
-                    cancellation = ((s_idx + t_idx) % 2 == 0)
+                    for i in range(num_slots):
+                        si = (base + i * 2) % len(all_slots)
+                        show_time = all_slots[si]
+                        start_dt = timezone.make_aware(
+                            timezone.datetime.combine(show_date, show_time)
+                        )
+                        cancellation = (m_idx + s_idx + day_offset) % 2 == 0
 
-                    show, created = Show.objects.get_or_create(
-                        movie=movie,
-                        screen=screen,
-                        start_time=start_dt,
-                        defaults={
-                            "end_time": start_dt + timedelta(minutes=movie.duration_minutes),
-                            "date": show_date,
-                            "language": movie.language,
-                            "format": fmt,
-                            "is_cancellable": cancellation,
-                            "is_active": True,
-                        },
-                    )
+                        show, created = Show.objects.get_or_create(
+                            movie=movie,
+                            screen=screen,
+                            start_time=start_dt,
+                            defaults={
+                                "end_time": start_dt + timedelta(minutes=movie.duration_minutes),
+                                "date": show_date,
+                                "language": movie.language,
+                                "format": fmt,
+                                "is_cancellable": cancellation,
+                                "is_active": True,
+                            },
+                        )
 
-                    if created:
-                        shows_created += 1
-                        seats = Seat.objects.filter(screen=screen)
-                        show_seats = [
-                            ShowSeat(show=show, seat=seat, status=ShowSeat.StatusChoices.AVAILABLE)
-                            for seat in seats
-                        ]
-                        ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
+                        if created:
+                            shows_created += 1
+                            seats = Seat.objects.filter(screen=screen)
+                            show_seats = [
+                                ShowSeat(show=show, seat=seat, status=ShowSeat.StatusChoices.AVAILABLE)
+                                for seat in seats
+                            ]
+                            ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
 
-        self.stdout.write(f"  + {shows_created} shows created across now-showing movies")
+        self.stdout.write(f"  + {shows_created} shows created (BookMyShow-style: all movies × all screens × 7 days)")
+
