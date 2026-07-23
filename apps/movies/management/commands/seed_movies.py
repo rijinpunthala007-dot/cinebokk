@@ -232,18 +232,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if options["skip_if_seeded"] and Movie.objects.exists():
-            self.stdout.write(self.style.NOTICE(
-                f"Database already seeded ({Movie.objects.count()} movies present) "
-                f"- skipping structural seed."
-            ))
-            # The structural seed (cities/theaters/movies/shows) is skipped, but
-            # poster/trailer/cast data must STILL be applied every deploy: on the
-            # live Render DB the movies already exist, so this early-return path
-            # is the only one that runs there. Idempotent upsert, safe to repeat.
-            self._apply_media_and_cast()
-            return
-
         if options["clear"]:
             self.stdout.write(self.style.WARNING("Clearing existing data..."))
             ShowSeat.objects.all().delete()
@@ -263,8 +251,16 @@ class Command(BaseCommand):
         genres = self._create_genres()
         theaters = self._create_theaters(cities)
         movies = self._create_movies(genres)
-        self._create_shows(movies, theaters)
         self._apply_media_and_cast()
+
+        if options["skip_if_seeded"] and Show.objects.exists():
+            self.stdout.write(self.style.NOTICE(
+                f"Database already seeded ({Show.objects.count()} shows present) "
+                f"- skipping show seed."
+            ))
+            return
+
+        self._create_shows(movies, theaters)
 
         self.stdout.write(self.style.SUCCESS(
             f"\n[SUCCESS] Seed complete!\n"
@@ -303,6 +299,13 @@ class Command(BaseCommand):
             ("Kolkata", "West Bengal"),
             ("Pune", "Maharashtra"),
             ("Kochi", "Kerala"),
+            ("Thiruvananthapuram", "Kerala"),
+            ("Thrissur", "Kerala"),
+            ("Kozhikode", "Kerala"),
+            ("Thodupuzha", "Kerala"),
+            ("Haripad", "Kerala"),
+            ("Chenggannur", "Kerala"),
+            ("Changanassery", "Kerala"),
         ]
         cities = {}
         for name, state in city_data:
@@ -353,7 +356,7 @@ class Command(BaseCommand):
                 ]
             },
             {
-                "name": "PVR Lulu Mall — Edappally",
+                "name": "PVR Lulu IMAX — Kochi",
                 "city": cities["Kochi"],
                 "address": "34/1000, NH 47, Edappally, Kochi 682024",
                 "amenities": ["4K LASER DOLBY 7.1", "IMAX", "Recliner", "Food Court", "Wheelchair Access"],
@@ -415,6 +418,114 @@ class Command(BaseCommand):
                 "amenities": ["IMAX", "4K LASER DOLBY 7.1", "Recliner", "Parking"],
                 "screens": [
                     {"name": "Screen 1 — IMAX", "capacity": 150, "categories": [("CLASSIC", 210), ("PREMIUM", 380), ("RECLINER", 660)]},
+                ]
+            },
+            # --- New Kerala Theaters ---
+            {
+                "name": "Aries Plex SL Cinemas — Thiruvananthapuram",
+                "city": cities["Thiruvananthapuram"],
+                "address": "SL Theatre Complex, Overbridge, Thiruvananthapuram, Kerala 695001",
+                "amenities": ["4K DOLBY ATMOS", "IMAX", "Recliner", "Parking", "Food Court"],
+                "screens": [
+                    {"name": "Audi 1 — IMAX", "capacity": 150, "categories": [("CLASSIC", 200), ("PREMIUM", 350), ("RECLINER", 600)]},
+                    {"name": "Audi 2 — 4K DOLBY ATMOS", "capacity": 120, "categories": [("CLASSIC", 150), ("PREMIUM", 250)]},
+                ]
+            },
+            {
+                "name": "Ragam Theatre — Thrissur",
+                "city": cities["Thrissur"],
+                "address": "Ragam Road, Thrissur, Kerala 680001",
+                "amenities": ["4K DOLBY ATMOS", "4K Projection", "Parking"],
+                "screens": [
+                    {"name": "Main Screen", "capacity": 150, "categories": [("CLASSIC", 150), ("PREMIUM", 250), ("RECLINER", 450)]},
+                ]
+            },
+            {
+                "name": "Palaxi Cinemas / EPIQ — Kozhikode",
+                "city": cities["Kozhikode"],
+                "address": "Palaxi Mall, Kozhikode, Kerala 673001",
+                "amenities": ["EPIQ Premium Large Format", "4K Dolby Atmos", "Food Court"],
+                "screens": [
+                    {"name": "Screen 1 — EPIQ", "capacity": 160, "categories": [("CLASSIC", 180), ("PREMIUM", 300), ("RECLINER", 500)]},
+                    {"name": "Screen 2", "capacity": 100, "categories": [("CLASSIC", 150), ("PREMIUM", 250)]},
+                ]
+            },
+            {
+                "name": "PVR (Forum Mall) — Kochi",
+                "city": cities["Kochi"],
+                "address": "Forum Mall, Maradu, Kochi, Kerala 682304",
+                "amenities": ["4K Projection", "Recliner", "Parking", "Food Court"],
+                "screens": [
+                    {"name": "Screen 1", "capacity": 120, "categories": [("CLASSIC", 170), ("PREMIUM", 300), ("RECLINER", 550)]},
+                    {"name": "Screen 2", "capacity": 100, "categories": [("CLASSIC", 150), ("PREMIUM", 250)]},
+                ]
+            },
+            {
+                "name": "Shenoys — Kochi",
+                "city": cities["Kochi"],
+                "address": "Shenoys Junction, MG Road, Kochi, Kerala 682035",
+                "amenities": ["4K Dolby Atmos", "Wheelchair Access", "Parking"],
+                "screens": [
+                    {"name": "Screen 1", "capacity": 130, "categories": [("CLASSIC", 160), ("PREMIUM", 280), ("RECLINER", 500)]},
+                    {"name": "Screen 2", "capacity": 100, "categories": [("CLASSIC", 140), ("PREMIUM", 240)]},
+                ]
+            },
+            {
+                "name": "Vanitha Vineetha Cineplex — Kochi",
+                "city": cities["Kochi"],
+                "address": "Edappally, Kochi, Kerala 682024",
+                "amenities": ["4K Dolby Atmos", "Parking"],
+                "screens": [
+                    {"name": "Vanitha", "capacity": 140, "categories": [("CLASSIC", 150), ("PREMIUM", 260)]},
+                    {"name": "Vineetha", "capacity": 100, "categories": [("CLASSIC", 130), ("PREMIUM", 220)]},
+                ]
+            },
+            {
+                "name": "Aashirvad Cineplexx — Thodupuzha",
+                "city": cities["Thodupuzha"],
+                "address": "Thodupuzha Road, Thodupuzha, Kerala 685584",
+                "amenities": ["4K Dolby Atmos", "Parking", "Food Court"],
+                "screens": [
+                    {"name": "Screen 1", "capacity": 120, "categories": [("CLASSIC", 150), ("PREMIUM", 250), ("RECLINER", 450)]},
+                    {"name": "Screen 2", "capacity": 90, "categories": [("CLASSIC", 130), ("PREMIUM", 220)]},
+                ]
+            },
+            {
+                "name": "Aashirvad Cineplexx — Haripad",
+                "city": cities["Haripad"],
+                "address": "National Highway, Haripad, Kerala 690514",
+                "amenities": ["4K Dolby Atmos", "Parking"],
+                "screens": [
+                    {"name": "Screen 1", "capacity": 110, "categories": [("CLASSIC", 140), ("PREMIUM", 240), ("RECLINER", 400)]},
+                ]
+            },
+            {
+                "name": "Kairali Sree Nila Theatre Complex — Thiruvananthapuram",
+                "city": cities["Thiruvananthapuram"],
+                "address": "KSRTC Bus Terminal, Thiruvananthapuram, Kerala 695001",
+                "amenities": ["4K Projection", "Dolby Atmos", "Centralized Govt Complex"],
+                "screens": [
+                    {"name": "Kairali", "capacity": 130, "categories": [("CLASSIC", 130), ("PREMIUM", 200)]},
+                    {"name": "Sree", "capacity": 100, "categories": [("CLASSIC", 120), ("PREMIUM", 180)]},
+                    {"name": "Nila", "capacity": 80, "categories": [("CLASSIC", 100), ("PREMIUM", 150)]},
+                ]
+            },
+            {
+                "name": "C Cinemas 4K 3D — Chenggannur",
+                "city": cities["Chenggannur"],
+                "address": "Kalyan Centre, Chengannur, Kerala 689121",
+                "amenities": ["4K 3D Projection", "Dolby Surround", "Parking"],
+                "screens": [
+                    {"name": "Screen 1", "capacity": 120, "categories": [("CLASSIC", 140), ("PREMIUM", 220)]},
+                ]
+            },
+            {
+                "name": "Abhinaya Cinemas — Changanassery",
+                "city": cities["Changanassery"],
+                "address": "Changanassery Road, Changanassery, Kerala 686101",
+                "amenities": ["4K Projection", "Parking"],
+                "screens": [
+                    {"name": "Screen 1", "capacity": 110, "categories": [("CLASSIC", 130), ("PREMIUM", 210)]},
                 ]
             },
         ]
@@ -808,15 +919,22 @@ class Command(BaseCommand):
     # Shows
     # -------------------------------------------------------------------------
     def _create_shows(self, movies, theaters):
+        import random
+        random.seed(42)
+
         screens = list(Screen.objects.select_related("theater", "theater__city").all())
         if not screens:
             return
 
-        # BookMyShow-style: every movie plays at every screen, 2-3 times/day, 7 days
-        all_slots = [time(10, 0), time(13, 15), time(16, 30), time(19, 45), time(22, 30)]
+        all_slots = [time(10, 15), time(13, 45), time(17, 15), time(20, 45)]
         formats_map = {
-            "IMAX": "IMAX", "4DX": "4DX", "PXL": "PXL",
-            "LUXE": "LUXE", "DOLBY": "4K LASER DOLBY 7.1",
+            "IMAX": "IMAX",
+            "4DX": "4DX",
+            "PXL": "PXL",
+            "LUXE": "LUXE",
+            "DOLBY": "4K LASER DOLBY 7.1",
+            "ATMOS": "4K DOLBY ATMOS",
+            "3D": "3D",
         }
 
         def screen_format(name):
@@ -827,45 +945,55 @@ class Command(BaseCommand):
 
         shows_created = 0
 
-        for m_idx, movie in enumerate(movies):
-            for day_offset in range(7):
-                show_date = date.today() + timedelta(days=day_offset)
+        for day_offset in range(7):
+            show_date = date.today() + timedelta(days=day_offset)
+            
+            # Shuffle movies so we can guarantee daily coverage
+            shuffled_movies = list(movies)
+            random.shuffle(shuffled_movies)
+            movie_iterator = iter(shuffled_movies)
 
-                for s_idx, screen in enumerate(screens):
-                    fmt = screen_format(screen.name)
-                    base = (m_idx + s_idx + day_offset) % len(all_slots)
-                    num_slots = 3 if (m_idx + s_idx) % 3 != 0 else 2
+            for screen in screens:
+                fmt = screen_format(screen.name)
 
-                    for i in range(num_slots):
-                        si = (base + i * 2) % len(all_slots)
-                        show_time = all_slots[si]
-                        start_dt = timezone.make_aware(
-                            timezone.datetime.combine(show_date, show_time)
-                        )
-                        cancellation = (m_idx + s_idx + day_offset) % 2 == 0
+                for slot in all_slots:
+                    next_movie = None
+                    try:
+                        next_movie = next(movie_iterator)
+                    except StopIteration:
+                        # All movies have at least one show scheduled today.
+                        # Now, have a 50% chance of scheduling a show to keep it realistic and lightweight
+                        if random.random() > 0.50:
+                            continue
+                        next_movie = random.choice(movies)
 
-                        show, created = Show.objects.get_or_create(
-                            movie=movie,
-                            screen=screen,
-                            start_time=start_dt,
-                            defaults={
-                                "end_time": start_dt + timedelta(minutes=movie.duration_minutes),
-                                "date": show_date,
-                                "language": movie.language,
-                                "format": fmt,
-                                "is_cancellable": cancellation,
-                                "is_active": True,
-                            },
-                        )
+                    start_dt = timezone.make_aware(
+                        timezone.datetime.combine(show_date, slot)
+                    )
+                    cancellation = random.choice([True, False])
 
-                        if created:
-                            shows_created += 1
-                            seats = Seat.objects.filter(screen=screen)
-                            show_seats = [
-                                ShowSeat(show=show, seat=seat, status=ShowSeat.StatusChoices.AVAILABLE)
-                                for seat in seats
-                            ]
-                            ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
+                    show, created = Show.objects.get_or_create(
+                        movie=next_movie,
+                        screen=screen,
+                        start_time=start_dt,
+                        defaults={
+                            "end_time": start_dt + timedelta(minutes=next_movie.duration_minutes),
+                            "date": show_date,
+                            "language": next_movie.language,
+                            "format": fmt,
+                            "is_cancellable": cancellation,
+                            "is_active": True,
+                        },
+                    )
 
-        self.stdout.write(f"  + {shows_created} shows created (BookMyShow-style: all movies × all screens × 7 days)")
+                    if created:
+                        shows_created += 1
+                        seats = Seat.objects.filter(screen=screen)
+                        show_seats = [
+                            ShowSeat(show=show, seat=seat, status=ShowSeat.StatusChoices.AVAILABLE)
+                            for seat in seats
+                        ]
+                        ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
+
+        self.stdout.write(f"  + {shows_created} shows created (Randomized BookMyShow-style)")
 

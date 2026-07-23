@@ -103,62 +103,85 @@ class Command(BaseCommand):
         shows_created = 0
         seats_created = 0
 
-        # For every movie, create shows at every screen for 7 days
-        # Each movie gets 2-3 showtimes per screen per day (staggered by movie index)
-        for m_idx, movie in enumerate(movies):
-            for day_offset in range(7):
-                show_date = today + timedelta(days=day_offset)
+        import random
+        random.seed(42)
 
-                for s_idx, screen in enumerate(screens):
-                    fmt = _screen_format(screen.name)
+        all_slots = [time(10, 15), time(13, 45), time(17, 15), time(20, 45)]
+        formats_map = {
+            "IMAX": "IMAX",
+            "4DX": "4DX",
+            "PXL": "PXL",
+            "LUXE": "LUXE",
+            "DOLBY": "4K LASER DOLBY 7.1",
+            "ATMOS": "4K DOLBY ATMOS",
+            "3D": "3D",
+        }
 
-                    # Each movie gets 2-3 slots per screen per day
-                    # Stagger by movie index so not every movie plays at the same time
-                    base = (m_idx + s_idx + day_offset) % len(ALL_SLOTS)
-                    # Pick 2 or 3 slots depending on movie+screen combo
-                    num_slots = 3 if (m_idx + s_idx) % 3 != 0 else 2
-                    slot_indices = [(base + i * 2) % len(ALL_SLOTS) for i in range(num_slots)]
+        def screen_format(name):
+            for key, fmt in formats_map.items():
+                if key in name.upper():
+                    return fmt
+            return "2D"
 
-                    for si in slot_indices:
-                        show_time = ALL_SLOTS[si]
-                        start_dt = timezone.make_aware(
-                            timezone.datetime.combine(show_date, show_time)
-                        )
+        for day_offset in range(7):
+            show_date = today + timedelta(days=day_offset)
+            
+            # Shuffle movies so we can guarantee daily coverage
+            shuffled_movies = list(movies)
+            random.shuffle(shuffled_movies)
+            movie_iterator = iter(shuffled_movies)
 
-                        cancellation = (m_idx + s_idx + day_offset) % 2 == 0
+            for screen in screens:
+                fmt = screen_format(screen.name)
 
-                        show, created = Show.objects.get_or_create(
-                            movie=movie,
-                            screen=screen,
-                            start_time=start_dt,
-                            defaults={
-                                "end_time": start_dt + timedelta(minutes=movie.duration_minutes),
-                                "date": show_date,
-                                "language": movie.language,
-                                "format": fmt,
-                                "is_cancellable": cancellation,
-                                "is_active": True,
-                            },
-                        )
+                for slot in all_slots:
+                    next_movie = None
+                    try:
+                        next_movie = next(movie_iterator)
+                    except StopIteration:
+                        # All movies have at least one show scheduled today.
+                        # Have a 50% chance of scheduling a show to keep it realistic and lightweight
+                        if random.random() > 0.50:
+                            continue
+                        next_movie = random.choice(movies)
 
-                        if created:
-                            shows_created += 1
-                            screen_seats = Seat.objects.filter(screen=screen)
-                            show_seats = [
-                                ShowSeat(
-                                    show=show,
-                                    seat=seat,
-                                    status=ShowSeat.StatusChoices.AVAILABLE,
-                                )
-                                for seat in screen_seats
-                            ]
-                            ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
-                            seats_created += len(show_seats)
+                    start_dt = timezone.make_aware(
+                        timezone.datetime.combine(show_date, slot)
+                    )
+                    cancellation = random.choice([True, False])
+
+                    show, created = Show.objects.get_or_create(
+                        movie=next_movie,
+                        screen=screen,
+                        start_time=start_dt,
+                        defaults={
+                            "end_time": start_dt + timedelta(minutes=next_movie.duration_minutes),
+                            "date": show_date,
+                            "language": next_movie.language,
+                            "format": fmt,
+                            "is_cancellable": cancellation,
+                            "is_active": True,
+                        },
+                    )
+
+                    if created:
+                        shows_created += 1
+                        screen_seats = Seat.objects.filter(screen=screen)
+                        show_seats = [
+                            ShowSeat(
+                                show=show,
+                                seat=seat,
+                                status=ShowSeat.StatusChoices.AVAILABLE,
+                            )
+                            for seat in screen_seats
+                        ]
+                        ShowSeat.objects.bulk_create(show_seats, ignore_conflicts=True)
+                        seats_created += len(show_seats)
 
         self.stdout.write(self.style.SUCCESS(
             f"\n  [DONE] Created {shows_created} shows ({seats_created} show-seats)\n"
             f"    Movies:  {len(movies)}\n"
             f"    Screens: {len(screens)}\n"
             f"    Days:    {today} to {today + timedelta(days=6)}\n"
-            f"    Pattern: 2-3 showtimes per movie per screen per day\n"
+            f"    Pattern: Randomized BookMyShow-style\n"
         ))
